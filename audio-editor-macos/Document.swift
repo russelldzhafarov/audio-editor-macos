@@ -2,7 +2,7 @@
 //  Document.swift
 //  audio-editor-macos
 //
-//  Created by blessed on 09.08.2021.
+//  Created by russell.dzhafarov@gmail.com on 09.08.2021.
 //
 
 import Cocoa
