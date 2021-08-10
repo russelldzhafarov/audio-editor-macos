@@ -10,9 +10,15 @@ import Combine
 
 class ViewModel: ObservableObject {
     
-    @Published public var selectedTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
-    @Published public var visibleTimeRange: Range<TimeInterval> = 0.0 ..< 60.0
-    @Published public var currentTime: TimeInterval = 0.0
+    @Published var selectedTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
+    @Published var visibleTimeRange: Range<TimeInterval> = 0.0 ..< 60.0
+    @Published var currentTime: TimeInterval = 0.0
     
-    @Published public var highlighted = false
+    @Published var highlighted = false
+    
+    var duration = TimeInterval(0)
+    
+    func power(at time: TimeInterval) -> Float {
+        return 0.0
+    }
 }
