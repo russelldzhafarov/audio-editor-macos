@@ -104,14 +104,29 @@ class OverlayView: NSView {
     }
     
     // MARK: - Drag & Drop
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        registerForDraggedTypes([.fileURL])
+    }
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        NSDragOperation()
+        let pboard = sender.draggingPasteboard
+        guard pboard.types?.contains(.fileURL) == true else { return NSDragOperation() }
+        
+        viewModel?.highlighted = true
+        
+        return .copy
     }
     override func draggingExited(_ sender: NSDraggingInfo?) {
-        
+        viewModel?.highlighted = false
     }
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        false
+        let pboard = sender.draggingPasteboard
+        guard pboard.types?.contains(.fileURL) == true,
+              let fileURL = NSURL(from: pboard) else { return false }
+        
+        viewModel?.openAudioFile(at: fileURL as URL)
+        
+        return true
     }
     
     // MARK: - Drawing
