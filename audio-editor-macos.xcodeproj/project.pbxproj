@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		90091B5D26C17689004072E5 /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90091B5C26C17689004072E5 /* WindowController.swift */; };
 		905BF56726C21F740010DBC2 /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905BF56626C21F740010DBC2 /* OverlayView.swift */; };
+		905BF56B26C23E7A0010DBC2 /* RulerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905BF56A26C23E7A0010DBC2 /* RulerView.swift */; };
 		908BBCD126C1A0E000C7D906 /* WaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 908BBCD026C1A0E000C7D906 /* WaveformView.swift */; };
 		908BBCD526C1A75000C7D906 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 908BBCD426C1A75000C7D906 /* ViewModel.swift */; };
 		90E2A7AD26C1715F0026CB1C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90E2A7AC26C1715F0026CB1C /* AppDelegate.swift */; };
@@ -21,6 +22,7 @@
 /* Begin PBXFileReference section */
 		90091B5C26C17689004072E5 /* WindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowController.swift; sourceTree = "<group>"; };
 		905BF56626C21F740010DBC2 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
+		905BF56A26C23E7A0010DBC2 /* RulerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulerView.swift; sourceTree = "<group>"; };
 		908BBCD026C1A0E000C7D906 /* WaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformView.swift; sourceTree = "<group>"; };
 		908BBCD426C1A75000C7D906 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		90E2A7A926C1715F0026CB1C /* audio-editor-macos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "audio-editor-macos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -64,10 +66,11 @@
 			isa = PBXGroup;
 			children = (
 				90E2A7AC26C1715F0026CB1C /* AppDelegate.swift */,
-				90E2A7AE26C1715F0026CB1C /* ViewController.swift */,
 				90091B5C26C17689004072E5 /* WindowController.swift */,
+				90E2A7AE26C1715F0026CB1C /* ViewController.swift */,
 				908BBCD026C1A0E000C7D906 /* WaveformView.swift */,
 				905BF56626C21F740010DBC2 /* OverlayView.swift */,
+				905BF56A26C23E7A0010DBC2 /* RulerView.swift */,
 				908BBCD426C1A75000C7D906 /* ViewModel.swift */,
 				90E2A7B026C1715F0026CB1C /* Document.swift */,
 				90E2A7B226C171640026CB1C /* Assets.xcassets */,
@@ -154,6 +157,7 @@
 				908BBCD526C1A75000C7D906 /* ViewModel.swift in Sources */,
 				90E2A7AD26C1715F0026CB1C /* AppDelegate.swift in Sources */,
 				90E2A7B126C1715F0026CB1C /* Document.swift in Sources */,
+				905BF56B26C23E7A0010DBC2 /* RulerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
