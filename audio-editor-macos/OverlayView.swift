@@ -31,13 +31,76 @@ class OverlayView: NSView {
     
     // MARK: - Events
     override func scrollWheel(with event: NSEvent) {
+        guard let viewModel = viewModel else { return }
         
+        let duration = viewModel.visibleTimeRange.upperBound - viewModel.visibleTimeRange.lowerBound
+        let secPerPx = CGFloat(duration) / bounds.width
+        
+        let deltaPixels = event.deltaX < 0
+            ? min(-event.deltaX * secPerPx,
+                  CGFloat(viewModel.duration - viewModel.visibleTimeRange.upperBound))
+            : min(event.deltaX * secPerPx,
+                  CGFloat(viewModel.visibleTimeRange.lowerBound)) * -1
+        
+        if deltaPixels != 0 {
+            viewModel.visibleTimeRange = viewModel.visibleTimeRange.lowerBound + Double(deltaPixels) ..< viewModel.visibleTimeRange.upperBound + Double(deltaPixels)
+        }
     }
     override func magnify(with event: NSEvent) {
+        guard let viewModel = viewModel else { return }
         
+        let scale = CGFloat(1) + event.magnification
+        
+        let duration = viewModel.visibleTimeRange.upperBound - viewModel.visibleTimeRange.lowerBound
+        let newDuration = duration / Double(scale)
+        
+        let loc = convert(event.locationInWindow, from: nil)
+        let time = viewModel.visibleTimeRange.lowerBound + (duration * Double(loc.x) / Double(bounds.width))
+        
+        let startTime = time - ((time - viewModel.visibleTimeRange.lowerBound) / Double(scale))
+        let endTime = startTime + newDuration
+        
+        guard startTime < endTime else { return }
+        
+        viewModel.visibleTimeRange = (startTime ..< endTime).clamped(to: 0 ..< viewModel.duration)
     }
     override func mouseDown(with event: NSEvent) {
+        guard let viewModel = viewModel else { return }
         
+        let start = convert(event.locationInWindow, from: nil)
+        
+        let duration = viewModel.visibleTimeRange.upperBound - viewModel.visibleTimeRange.lowerBound
+        let startTime = viewModel.visibleTimeRange.lowerBound + (duration * Double(start.x) / Double(bounds.width))
+        
+        while true {
+            guard let nextEvent = window?.nextEvent(matching: [.leftMouseUp, .leftMouseDragged]) else { continue }
+            
+            let end = convert(nextEvent.locationInWindow, from: nil)
+            
+            if start.equalTo(end) {
+                viewModel.selectedTimeRange = 0.0 ..< 0.0
+                viewModel.currentTime = startTime
+                
+                viewModel.seek(to: startTime)
+                
+            } else {
+                
+                let endTime = viewModel.visibleTimeRange.lowerBound + (duration * Double(end.x) / Double(bounds.width))
+                
+                if startTime < endTime {
+                    viewModel.selectedTimeRange = startTime ..< endTime
+                    viewModel.currentTime = startTime
+                    
+                } else {
+                    viewModel.selectedTimeRange = endTime ..< startTime
+                    viewModel.currentTime = endTime
+                }
+            }
+            
+            if nextEvent.type == .leftMouseUp {
+                break
+            }
+        }
     }
     
     // MARK: - Drag & Drop
