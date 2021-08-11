@@ -14,6 +14,9 @@ extension NSColor {
     static var selectionColor: NSColor {
         NSColor.cursorColor.withAlphaComponent(0.3)
     }
+    static var highlightColor: NSColor {
+        NSColor.keyboardFocusIndicatorColor.withAlphaComponent(0.2)
+    }
 }
 
 class OverlayView: NSView {
@@ -91,9 +94,15 @@ class OverlayView: NSView {
                     viewModel.selectedTimeRange = startTime ..< endTime
                     viewModel.currentTime = startTime
                     
-                } else {
+                } else if endTime > startTime {
                     viewModel.selectedTimeRange = endTime ..< startTime
                     viewModel.currentTime = endTime
+                    
+                } else {
+                    viewModel.selectedTimeRange = 0.0 ..< 0.0
+                    viewModel.currentTime = startTime
+                    
+                    viewModel.seek(to: startTime)
                 }
             }
             
@@ -124,6 +133,7 @@ class OverlayView: NSView {
         guard pboard.types?.contains(.fileURL) == true,
               let fileURL = NSURL(from: pboard) else { return false }
         
+        viewModel?.highlighted = false
         viewModel?.openAudioFile(at: fileURL as URL)
         
         return true
@@ -132,8 +142,16 @@ class OverlayView: NSView {
     // MARK: - Drawing
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
+        
+        // Drawing code here.
         guard let viewModel = viewModel,
               let ctx = NSGraphicsContext.current?.cgContext else { return }
+        
+        // Draw highlighting
+        if viewModel.highlighted {
+            ctx.setFillColor(NSColor.highlightColor.cgColor)
+            ctx.fill(bounds)
+        }
         
         let startTime = viewModel.visibleTimeRange.lowerBound
         let endTime = viewModel.visibleTimeRange.upperBound

@@ -2,7 +2,7 @@
 //  RulerView.swift
 //  audio-editor-macos
 //
-//  Created by blessed on 10.08.2021.
+//  Created by russell.dzhafarov@gmail.com on 10.08.2021.
 //
 
 import Cocoa
@@ -49,7 +49,7 @@ class RulerView: NSView {
     
     let attributes: [NSAttributedString.Key: Any] = [
       .foregroundColor: NSColor.rulerLabelColor,
-      .font: NSFont.systemFont(ofSize: CGFloat(11))
+      .font: NSFont.systemFont(ofSize: CGFloat(13))
     ]
     
     // MARK: - Overrides
@@ -89,11 +89,11 @@ class RulerView: NSView {
         for time in stride(from: fixedStartTime, to: endTime, by: stepInSeconds) {
             
             NSString(string: stepInSeconds < 1 ? time.mmssms() : time.mmss())
-                .draw(at: NSPoint(x: x + 4.0, y: bounds.height/4),
+                .draw(at: NSPoint(x: x + CGFloat(4), y: CGFloat(0)),
                       withAttributes: attributes)
             
             context.move(to: CGPoint(x: x,
-                                     y: bounds.height/2))
+                                     y: bounds.height - CGFloat(8)))
             
             context.addLine(to: CGPoint(x: x,
                                         y: bounds.height))
