@@ -11,8 +11,6 @@ fileprivate extension NSToolbar.Identifier {
     static let toolbarIdentifier = NSToolbar.Identifier("MainWindowToolbarIdentifier")
 }
 fileprivate extension NSToolbarItem.Identifier {
-    static let open = NSToolbarItem.Identifier(rawValue: "openToolbarItemIdentifier")
-    static let save = NSToolbarItem.Identifier(rawValue: "saveToolbarItemIdentifier")
     static let undo = NSToolbarItem.Identifier(rawValue: "undoToolbarItemIdentifier")
     static let redo = NSToolbarItem.Identifier(rawValue: "redoToolbarItemIdentifier")
     static let cut = NSToolbarItem.Identifier(rawValue: "cutToolbarItemIdentifier")
@@ -26,8 +24,6 @@ fileprivate extension NSColor {
     }
 }
 fileprivate extension NSImage.Name {
-    static let open = NSImage.Name("folder")
-    static let save = NSImage.Name("square.and.arrow.up")
     static let undo = NSImage.Name("arrow.uturn.backward")
     static let redo = NSImage.Name("arrow.uturn.forward")
     static let cut = NSImage.Name("scissors")
@@ -53,16 +49,13 @@ class WindowController: NSWindowController {
         
         window?.toolbarStyle = .unified
         window?.titleVisibility = .hidden
+        window?.titlebarAppearsTransparent = true
         
         window?.toolbar?.validateVisibleItems()
         window?.backgroundColor = NSColor.windowBackgroundColor
     }
     
     // MARK: - Toolbar Item Custom Actions
-    @IBAction func open(_ sender: Any) {
-    }
-    @IBAction func save(_ sender: Any) {
-    }
     @IBAction func undo(_ sender: Any) {
         undoManager?.undo()
     }
@@ -88,22 +81,18 @@ extension WindowController: NSMenuItemValidation {
 extension WindowController: NSToolbarItemValidation {
     func validateToolbarItem(_ item: NSToolbarItem) -> Bool {
         switch item.itemIdentifier {
-        case .open:
-            return true
-        case .save:
-            return window?.undoManager?.canUndo ?? false
         case .undo:
             return window?.undoManager?.canUndo ?? false
         case .redo:
             return window?.undoManager?.canRedo ?? false
         case .cut:
-            return false
+            return (contentViewController?.representedObject as? ViewModel)?.selectedTimeRange.isEmpty == false
         case .copy:
-            return false
+            return (contentViewController?.representedObject as? ViewModel)?.selectedTimeRange.isEmpty == false
         case .paste:
             return NSPasteboard.general.data(forType: .audio)?.isEmpty == false
         case .delete:
-            return false
+            return (contentViewController?.representedObject as? ViewModel)?.selectedTimeRange.isEmpty == false
         default:
             return false
         }
@@ -113,9 +102,6 @@ extension WindowController: NSToolbarItemValidation {
 extension WindowController: NSToolbarDelegate {
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
         return [
-            .open,
-            .save,
-            .space,
             .undo,
             .redo,
             .cut,
@@ -127,8 +113,6 @@ extension WindowController: NSToolbarDelegate {
     }
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
         return [
-            .open,
-            .save,
             .undo,
             .redo,
             .cut,
@@ -145,16 +129,6 @@ extension WindowController: NSToolbarDelegate {
         let action: Selector
         let symbolName: String
         switch itemIdentifier {
-        case .open:
-            label = "Open"
-            action = #selector(open(_:))
-            symbolName = .open
-            
-        case .save:
-            label = "Save"
-            action = #selector(save(_:))
-            symbolName = .save
-            
         case .undo:
             label = "Undo"
             action = #selector(undo(_:))
