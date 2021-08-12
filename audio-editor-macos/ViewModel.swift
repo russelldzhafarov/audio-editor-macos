@@ -18,8 +18,20 @@ class ViewModel: ObservableObject {
     struct ReadAudioError: Error {
     }
     
-    private let audioEngine = AVAudioEngine()
-    private let player = AVAudioPlayerNode()
+    struct AudioData {
+        let fileFormat: String
+        let duration: TimeInterval
+        let channelCount: Int
+        let pcmBuffer: AVAudioPCMBuffer
+        let sampleData: AudioSampleData
+        let compressedData: AudioSampleData
+    }
+    
+    struct AudioSampleData {
+        let sampleRate: Double
+        let lamps: [Float]
+        let ramps: [Float]
+    }
     
     @Published var selectedTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
     @Published var visibleTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
@@ -49,11 +61,13 @@ class ViewModel: ObservableObject {
     }
     
     public func power(at time: TimeInterval) -> Float {
-        let index = Int(time * compressedSampleRate)
+        guard let sampleData = audioData?.compressedData else { return 0.0 }
         
-        guard compressed.indices.contains(index) else { return 0.0 }
+        let index = Int(time * sampleData.sampleRate)
         
-        let power = compressed[index]
+        guard sampleData.lamps.indices.contains(index) else { return 0.0 }
+        
+        let power = sampleData.lamps[index]
         
         let avgPower = 20 * log2(power)
         
@@ -96,15 +110,24 @@ class ViewModel: ObservableObject {
             
             try file.read(into: buffer)
             
-            amplitudes = Array(UnsafeBufferPointer(start: buffer.floatChannelData?[0], count:Int(buffer.frameLength)))
-            duration = asset.duration.seconds
-            sampleRate = file.fileFormat.sampleRate
-            channelCount = file.fileFormat.channelCount
-            visibleTimeRange = 0.0 ..< self.duration
+            let leftAmps = Array(UnsafeBufferPointer(start: buffer.floatChannelData?[0], count:Int(buffer.frameLength)))
+            let rightAmps = Array(UnsafeBufferPointer(start: buffer.floatChannelData?[1], count:Int(buffer.frameLength)))
             
-            compressed = self.compress(amplitudes, compression: 500)
-            compressedSampleRate = Double(compressed.count) / duration
+            let compressedAmps = compress(leftAmps, compression: 500)
+            let compressedSampleRate = Double(compressedAmps.count) / asset.duration.seconds
             
+            audioData = AudioData(fileFormat: url.pathExtension,
+                                  duration: asset.duration.seconds,
+                                  channelCount: Int(file.fileFormat.channelCount),
+                                  pcmBuffer: buffer,
+                                  sampleData: AudioSampleData(sampleRate: file.fileFormat.sampleRate,
+                                                              lamps: leftAmps,
+                                                              ramps: rightAmps),
+                                  compressedData: AudioSampleData(sampleRate: compressedSampleRate,
+                                                                  lamps: compressedAmps,
+                                                                  ramps: []))
+            
+            visibleTimeRange = 0.0 ..< asset.duration.seconds
             loaded = true
             
         } catch {
