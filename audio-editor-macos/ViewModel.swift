@@ -9,12 +9,28 @@ import Combine
 import AVFoundation
 import Accelerate
 
+extension AVAudioPCMBuffer {
+    func segment(from startFrame: AVAudioFramePosition, to endFrame: AVAudioFramePosition) -> AVAudioPCMBuffer? {
+        let framesToCopy = AVAudioFrameCount(endFrame - startFrame)
+        guard let segment = AVAudioPCMBuffer(pcmFormat: self.format, frameCapacity: framesToCopy) else { return nil }
+        
+        let sampleSize = self.format.streamDescription.pointee.mBytesPerFrame
+        
+        let srcPtr = UnsafeMutableAudioBufferListPointer(self.mutableAudioBufferList)
+        let dstPtr = UnsafeMutableAudioBufferListPointer(segment.mutableAudioBufferList)
+        for (src, dst) in zip(srcPtr, dstPtr) {
+            memcpy(dst.mData, src.mData?.advanced(by: Int(startFrame) * Int(sampleSize)), Int(framesToCopy) * Int(sampleSize))
+        }
+        
+        segment.frameLength = framesToCopy
+        return segment
+    }
+}
+
 class ViewModel: ObservableObject {
-    
     enum PlayerState {
         case playing, stopped, paused
     }
-    
     struct ReadAudioError: Error {
     }
     
@@ -36,28 +52,90 @@ class ViewModel: ObservableObject {
     @Published var selectedTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
     @Published var visibleTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
     @Published var currentTime: TimeInterval = 0.0
-    
+    @Published var playerState = PlayerState.stopped
     @Published var highlighted = false
-    
     @Published var loaded = false
+    var looped = true
     
-    var duration = TimeInterval(0)
-    var sampleRate = Double(0)
-    var amplitudes = [Float]()
-    var channelCount = AVAudioChannelCount(0)
+    var duration: TimeInterval {
+        audioData?.duration ?? TimeInterval(0)
+    }
+    
+    var audioData: AudioData?
+    
+    private let audioEngine = AVAudioEngine()
+    private let audioPlayer = AVAudioPlayerNode()
+    
+    @Published var error: Error?
+    
+    var status: String? {
+        guard let audioData = audioData else { return nil }
+        return "\(audioData.fileFormat)  |  \(audioData.sampleData.sampleRate / Double(1000)) kHz  |  \(audioData.channelCount == 1 ? "Mono" : "Stereo")  |  \(audioData.duration.mmss())"
+    }
     
     func seek(to time: TimeInterval) {
+        let wasPlaying = playerState == .playing
+        if wasPlaying {
+            stop()
+        }
         currentTime = time
+        if wasPlaying {
+            play()
+        }
     }
     
     func play() {
-        player.play()
-    }
-    func pause() {
-        player.pause()
+        switch playerState {
+        case .playing:
+            stop()
+            
+        case .paused, .stopped:
+            do {
+                guard let audioData = audioData else {
+                    throw ReadAudioError()
+                }
+                
+                audioEngine.attach(audioPlayer)
+                audioEngine.connect(audioPlayer,
+                                    to: audioEngine.outputNode,
+                                    format: nil)
+                
+                if selectedTimeRange.isEmpty {
+                    audioPlayer.scheduleBuffer(audioData.pcmBuffer)
+                } else {
+                    
+                    let from = AVAudioFramePosition(selectedTimeRange.lowerBound * audioData.sampleData.sampleRate)
+                    let to = AVAudioFramePosition(selectedTimeRange.upperBound * audioData.sampleData.sampleRate)
+                    
+                    guard let segment = audioData.pcmBuffer.segment(from: from, to: to) else {
+                        throw ReadAudioError()
+                    }
+                    
+                    audioPlayer.scheduleBuffer(segment)
+                }
+                
+                try audioEngine.start()
+                audioPlayer.play()
+                
+                playerState = .playing
+                
+            } catch {
+                self.error = error
+            }
+        }
     }
     func stop() {
-        player.stop()
+        audioPlayer.stop()
+        audioEngine.stop()
+        playerState = .stopped
+    }
+    func forward() {
+        let time = (currentTime + TimeInterval(15)).clamped(to: 0.0...duration)
+        seek(to: time)
+    }
+    func backward() {
+        let time = (currentTime - TimeInterval(15)).clamped(to: 0.0...duration)
+        seek(to: time)
     }
     
     public func power(at time: TimeInterval) -> Float {
@@ -134,9 +212,6 @@ class ViewModel: ObservableObject {
             
         }
     }
-    
-    var compressed = [Float]()
-    var compressedSampleRate = Double(0)
     
     func compress(_ inputSignal: [Float], compression: Int) -> [Float] {
         
