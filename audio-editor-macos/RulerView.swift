@@ -43,13 +43,13 @@ extension NSColor {
 }
 
 class RulerView: NSView {
-
+    
     // MARK: - Vars
     var viewModel: ViewModel?
     
     let attributes: [NSAttributedString.Key: Any] = [
-      .foregroundColor: NSColor.rulerLabelColor,
-      .font: NSFont.systemFont(ofSize: CGFloat(13))
+        .foregroundColor: NSColor.rulerLabelColor,
+        .font: NSFont.systemFont(ofSize: CGFloat(13))
     ]
     
     // MARK: - Overrides
@@ -57,21 +57,28 @@ class RulerView: NSView {
     override var acceptsFirstResponder: Bool { true }
     override var mouseDownCanMoveWindow: Bool { false }
     
+    // MARK: - Drawing
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
         
         // Drawing code here.
         guard let viewModel = viewModel,
-              let context = NSGraphicsContext.current?.cgContext else { return }
+              let ctx = NSGraphicsContext.current?.cgContext else { return }
+        
+        guard !viewModel.visibleTimeRange.isEmpty else {
+            ctx.setFillColor(NSColor.waveformBackgroundColor.cgColor)
+            ctx.fill(bounds)
+            return
+        }
         
         let startTime = viewModel.visibleTimeRange.lowerBound
         let endTime = viewModel.visibleTimeRange.upperBound
         
         let duration = endTime - startTime
-        let pxPerSecond = bounds.width / CGFloat(duration)
+        let pxPerSec = bounds.width / CGFloat(duration)
         
         let stepInSeconds: TimeInterval
-        switch pxPerSecond {
+        switch pxPerSec {
         case 0 ..< 10: stepInSeconds = 10
         case 10 ..< 15: stepInSeconds = 5
         case 15 ..< 50: stepInSeconds = 3
@@ -82,25 +89,24 @@ class RulerView: NSView {
         
         let fixedStartTime = startTime.floor(nearest: stepInSeconds)
         
-        var x = CGFloat(fixedStartTime - startTime) * pxPerSecond
+        var x = CGFloat(fixedStartTime - startTime) * pxPerSec
         for time in stride(from: fixedStartTime, to: endTime, by: stepInSeconds) {
             
             NSString(string: stepInSeconds < 1 ? time.mmssms() : time.mmss())
-                .draw(at: NSPoint(x: x + CGFloat(4), y: CGFloat(0)),
+                .draw(at: NSPoint(x: x + CGFloat(4), y: CGFloat(2)),
                       withAttributes: attributes)
             
-            context.move(to: CGPoint(x: x,
-                                     y: bounds.height - CGFloat(8)))
+            ctx.move(to: CGPoint(x: x,
+                                 y: bounds.height - CGFloat(8)))
             
-            context.addLine(to: CGPoint(x: x,
-                                        y: bounds.height))
+            ctx.addLine(to: CGPoint(x: x,
+                                    y: bounds.height))
             
-            x += pxPerSecond * CGFloat(stepInSeconds)
+            x += pxPerSec * CGFloat(stepInSeconds)
         }
         
-        context.setLineWidth(CGFloat(1))
-        context.setStrokeColor(NSColor.rulerColor.cgColor)
-        context.strokePath()
+        ctx.setLineWidth(CGFloat(1))
+        ctx.setStrokeColor(NSColor.rulerColor.cgColor)
+        ctx.strokePath()
     }
-    
 }

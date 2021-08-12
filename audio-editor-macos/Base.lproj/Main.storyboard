@@ -713,11 +713,17 @@
                             <customView wantsLayer="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BtA-z3-39v" customClass="WaveformView" customModule="audio_editor_macos" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="98" width="658" height="166"/>
                             </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="aWP-cs-qc7" customClass="RulerView" customModule="audio_editor_macos" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="264" width="658" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="24" id="51G-WO-4T2"/>
+                                </constraints>
+                            </customView>
                             <customView wantsLayer="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ntm-6L-Th3" customClass="OverlayView" customModule="audio_editor_macos" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="98" width="658" height="166"/>
+                                <rect key="frame" x="0.0" y="98" width="658" height="190"/>
                             </customView>
                             <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="1lZ-07-ZEI">
-                                <rect key="frame" x="304" y="166" width="50" height="56"/>
+                                <rect key="frame" x="304" y="182" width="50" height="56"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="50" id="DPh-Id-ykz"/>
                                     <constraint firstAttribute="width" constant="50" id="p0i-hu-J2R"/>
@@ -726,7 +732,7 @@
                                 <color key="contentTintColor" name="quaternaryLabelColor"/>
                             </imageView>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6Zc-lh-ky6">
-                                <rect key="frame" x="216" y="128" width="226" height="21"/>
+                                <rect key="frame" x="216" y="144" width="226" height="21"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Drag &amp; Drop media file here" id="XbS-hI-dqt">
                                     <font key="font" metaFont="system" size="18"/>
                                     <color key="textColor" name="quaternaryLabelColor"/>
@@ -745,8 +751,8 @@
                                         </textFieldCell>
                                     </textField>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="OHC-Jo-SEp">
-                                        <rect key="frame" x="514" y="16" width="24" height="14"/>
-                                        <textFieldCell key="cell" lineBreakMode="clipping" title="End" id="cY9-dm-Jnq">
+                                        <rect key="frame" x="501" y="16" width="49" height="14"/>
+                                        <textFieldCell key="cell" lineBreakMode="clipping" title="Duration" id="cY9-dm-Jnq">
                                             <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="secondaryLabelColor"/>
                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -777,8 +783,8 @@
                                         </textFieldCell>
                                     </textField>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="UpD-14-CKY">
-                                        <rect key="frame" x="576" y="16" width="49" height="14"/>
-                                        <textFieldCell key="cell" lineBreakMode="clipping" title="Duration" id="yzn-Cl-3HF">
+                                        <rect key="frame" x="589" y="16" width="24" height="14"/>
+                                        <textFieldCell key="cell" lineBreakMode="clipping" title="End" id="yzn-Cl-3HF">
                                             <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="secondaryLabelColor"/>
                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -896,12 +902,6 @@
                                     <constraint firstItem="GGv-Mw-bme" firstAttribute="centerY" secondItem="vzF-jN-Pve" secondAttribute="centerY" id="whS-sI-67d"/>
                                 </constraints>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="aWP-cs-qc7" customClass="RulerView" customModule="audio_editor_macos" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="264" width="658" height="20"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="20" id="51G-WO-4T2"/>
-                                </constraints>
-                            </customView>
                             <box boxType="custom" borderWidth="0.0" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="iWn-tc-d5F">
                                 <rect key="frame" x="0.0" y="0.0" width="658" height="28"/>
                                 <view key="contentView" id="idt-Mb-gGe">
@@ -916,8 +916,18 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
+                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FzB-a2-TFM">
+                                            <rect key="frame" x="632" y="7" width="16" height="15"/>
+                                            <textFieldCell key="cell" lineBreakMode="clipping" title="--" id="seX-57-4cn">
+                                                <font key="font" metaFont="cellTitle"/>
+                                                <color key="textColor" name="secondaryLabelColor"/>
+                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
                                     </subviews>
                                     <constraints>
+                                        <constraint firstAttribute="trailing" secondItem="FzB-a2-TFM" secondAttribute="trailing" constant="12" id="7Il-N5-1wb"/>
+                                        <constraint firstItem="FzB-a2-TFM" firstAttribute="centerY" secondItem="idt-Mb-gGe" secondAttribute="centerY" id="GVP-Pm-sPL"/>
                                         <constraint firstItem="UTE-uc-8Sp" firstAttribute="centerY" secondItem="idt-Mb-gGe" secondAttribute="centerY" id="Llj-qf-Xll"/>
                                         <constraint firstItem="UTE-uc-8Sp" firstAttribute="leading" secondItem="idt-Mb-gGe" secondAttribute="leading" constant="12" id="xl4-Ef-A5P"/>
                                     </constraints>
@@ -939,8 +949,9 @@
                             <constraint firstAttribute="bottom" secondItem="iWn-tc-d5F" secondAttribute="bottom" id="JnU-je-ENG"/>
                             <constraint firstItem="6Zc-lh-ky6" firstAttribute="top" secondItem="1lZ-07-ZEI" secondAttribute="bottom" constant="20" id="M4o-ki-dHa"/>
                             <constraint firstItem="aWP-cs-qc7" firstAttribute="leading" secondItem="ERx-hH-rdd" secondAttribute="leading" id="MOr-4L-7Wj"/>
-                            <constraint firstItem="aWP-cs-qc7" firstAttribute="top" secondItem="ERx-hH-rdd" secondAttribute="top" constant="16" id="OCJ-mS-0xv"/>
-                            <constraint firstItem="6Zc-lh-ky6" firstAttribute="centerY" secondItem="ERx-hH-rdd" secondAttribute="centerY" constant="12" id="PgC-nJ-VGG"/>
+                            <constraint firstItem="aWP-cs-qc7" firstAttribute="top" secondItem="ERx-hH-rdd" secondAttribute="top" constant="12" id="OCJ-mS-0xv"/>
+                            <constraint firstItem="6Zc-lh-ky6" firstAttribute="centerY" secondItem="ERx-hH-rdd" secondAttribute="centerY" constant="-4" id="PgC-nJ-VGG"/>
+                            <constraint firstItem="Ntm-6L-Th3" firstAttribute="top" secondItem="ERx-hH-rdd" secondAttribute="top" constant="12" id="RZ5-Cz-y4I"/>
                             <constraint firstAttribute="trailing" secondItem="Ntm-6L-Th3" secondAttribute="trailing" id="RcY-iq-fST"/>
                             <constraint firstItem="BtA-z3-39v" firstAttribute="top" secondItem="aWP-cs-qc7" secondAttribute="bottom" id="Rrb-0X-ga1"/>
                             <constraint firstAttribute="trailing" secondItem="BtA-z3-39v" secondAttribute="trailing" id="akU-rA-3SZ"/>
@@ -948,7 +959,6 @@
                             <constraint firstItem="vzF-jN-Pve" firstAttribute="top" secondItem="BtA-z3-39v" secondAttribute="bottom" id="fgT-zw-kvG"/>
                             <constraint firstItem="vzF-jN-Pve" firstAttribute="leading" secondItem="ERx-hH-rdd" secondAttribute="leading" id="iR0-DW-YDf"/>
                             <constraint firstItem="iWn-tc-d5F" firstAttribute="leading" secondItem="ERx-hH-rdd" secondAttribute="leading" id="jtz-dI-K04"/>
-                            <constraint firstItem="Ntm-6L-Th3" firstAttribute="top" secondItem="aWP-cs-qc7" secondAttribute="bottom" id="n0E-bQ-2fV"/>
                             <constraint firstAttribute="trailing" secondItem="aWP-cs-qc7" secondAttribute="trailing" id="ye3-eB-8ad"/>
                         </constraints>
                     </view>
@@ -957,11 +967,12 @@
                         <outlet property="hintImageView" destination="1lZ-07-ZEI" id="11Z-3b-5p0"/>
                         <outlet property="hintLabel" destination="6Zc-lh-ky6" id="mVX-2o-c0h"/>
                         <outlet property="overlayView" destination="Ntm-6L-Th3" id="GAj-P9-enu"/>
+                        <outlet property="playButton" destination="m1c-M9-dog" id="6CY-Ul-eVh"/>
                         <outlet property="rulerView" destination="aWP-cs-qc7" id="ww8-JT-kBU"/>
-                        <outlet property="selectionDurationLabel" destination="23I-L5-b8W" id="ifF-3L-zYP"/>
-                        <outlet property="selectionEndTimeLabel" destination="Q6Z-AS-Q8d" id="wzZ-ym-kTO"/>
+                        <outlet property="selectionDurationLabel" destination="Q6Z-AS-Q8d" id="YZS-B6-pc9"/>
+                        <outlet property="selectionEndTimeLabel" destination="23I-L5-b8W" id="uo5-WC-wvz"/>
                         <outlet property="selectionStartTimeLabel" destination="SL5-Bk-pOW" id="yjh-XR-tKy"/>
-                        <outlet property="statusLabel" destination="UTE-uc-8Sp" id="T7a-y2-Fg3"/>
+                        <outlet property="statusLabel" destination="FzB-a2-TFM" id="vAP-nB-TeD"/>
                         <outlet property="waveformView" destination="BtA-z3-39v" id="uyH-7H-agG"/>
                     </connections>
                 </viewController>
