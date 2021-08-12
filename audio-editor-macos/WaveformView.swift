@@ -22,9 +22,8 @@ class WaveformView: NSView {
     var viewModel: ViewModel?
     
     // MARK: - Overrides
-    public override var isFlipped: Bool {
-        return true
-    }
+    override var isFlipped: Bool { true }
+    override var mouseDownCanMoveWindow: Bool { false }
     
     // MARK: - Drawing
     override func draw(_ dirtyRect: NSRect) {

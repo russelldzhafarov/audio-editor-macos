@@ -53,6 +53,7 @@ class WindowController: NSWindowController {
         
         window?.toolbar?.validateVisibleItems()
         window?.backgroundColor = NSColor.windowBackgroundColor
+        window?.isMovableByWindowBackground = true
     }
     
     // MARK: - Toolbar Item Custom Actions

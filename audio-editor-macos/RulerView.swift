@@ -53,12 +53,9 @@ class RulerView: NSView {
     ]
     
     // MARK: - Overrides
-    public override var isFlipped: Bool {
-        return true
-    }
-    public override var acceptsFirstResponder: Bool {
-        return true
-    }
+    override var isFlipped: Bool { true }
+    override var acceptsFirstResponder: Bool { true }
+    override var mouseDownCanMoveWindow: Bool { false }
     
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)

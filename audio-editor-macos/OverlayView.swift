@@ -25,12 +25,9 @@ class OverlayView: NSView {
     var viewModel: ViewModel?
     
     // MARK: - Overrides
-    public override var isFlipped: Bool {
-        return true
-    }
-    public override var acceptsFirstResponder: Bool {
-        return true
-    }
+    override var isFlipped: Bool { true }
+    override var acceptsFirstResponder: Bool { true }
+    override var mouseDownCanMoveWindow: Bool { false }
     
     // MARK: - Events
     override func scrollWheel(with event: NSEvent) {
