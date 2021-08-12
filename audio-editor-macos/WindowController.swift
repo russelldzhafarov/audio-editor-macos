@@ -105,6 +105,7 @@ extension WindowController: NSToolbarDelegate {
         return [
             .undo,
             .redo,
+            .space,
             .cut,
             .copy,
             .paste,
