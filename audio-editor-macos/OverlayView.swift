@@ -18,6 +18,11 @@ extension NSColor {
         NSColor.keyboardFocusIndicatorColor.withAlphaComponent(0.2)
     }
 }
+extension Comparable {
+    func clamped(to limits: ClosedRange<Self>) -> Self {
+        return min(max(self, limits.lowerBound), limits.upperBound)
+    }
+}
 
 class OverlayView: NSView {
     
@@ -79,27 +84,23 @@ class OverlayView: NSView {
             
             if start.equalTo(end) {
                 viewModel.selectedTimeRange = 0.0 ..< 0.0
-                viewModel.currentTime = startTime
-                
-                viewModel.seek(to: startTime)
+                viewModel.seek(to: startTime.clamped(to: 0.0...viewModel.duration))
                 
             } else {
                 
                 let endTime = viewModel.visibleTimeRange.lowerBound + (duration * Double(end.x) / Double(bounds.width))
                 
                 if startTime < endTime {
-                    viewModel.selectedTimeRange = startTime ..< endTime
-                    viewModel.currentTime = startTime
+                    viewModel.selectedTimeRange = (startTime ..< endTime).clamped(to: 0 ..< viewModel.duration)
+                    viewModel.currentTime = startTime.clamped(to: 0.0...viewModel.duration)
                     
-                } else if endTime > startTime {
-                    viewModel.selectedTimeRange = endTime ..< startTime
-                    viewModel.currentTime = endTime
+                } else if startTime > endTime {
+                    viewModel.selectedTimeRange = (endTime ..< startTime).clamped(to: 0 ..< viewModel.duration)
+                    viewModel.currentTime = endTime.clamped(to: 0.0...viewModel.duration)
                     
                 } else {
                     viewModel.selectedTimeRange = 0.0 ..< 0.0
-                    viewModel.currentTime = startTime
-                    
-                    viewModel.seek(to: startTime)
+                    viewModel.seek(to: startTime.clamped(to: 0.0...viewModel.duration))
                 }
             }
             
