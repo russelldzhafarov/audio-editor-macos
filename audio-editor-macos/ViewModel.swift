@@ -209,7 +209,7 @@ class ViewModel: ObservableObject {
             loaded = true
             
         } catch {
-            
+            self.error = error
         }
     }
     

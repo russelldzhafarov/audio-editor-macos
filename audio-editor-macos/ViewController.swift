@@ -7,7 +7,11 @@
 
 import Cocoa
 import Combine
-import AVFoundation
+
+extension NSImage.Name {
+    static let play = NSImage.Name("play.fill")
+    static let pause = NSImage.Name("pause.fill")
+}
 
 class ViewController: NSViewController {
     
@@ -18,22 +22,59 @@ class ViewController: NSViewController {
     @IBOutlet weak var selectionEndTimeLabel: NSTextField!
     @IBOutlet weak var selectionDurationLabel: NSTextField!
     @IBOutlet weak var statusLabel: NSTextField!
+    @IBOutlet weak var playButton: NSButton!
     
     @IBOutlet weak var rulerView: RulerView!
     @IBOutlet weak var overlayView: OverlayView!
     @IBOutlet weak var waveformView: WaveformView!
     
-    var viewModel: ViewModel?
+    var viewModel: ViewModel? {
+        representedObject as? ViewModel
+    }
+    
+    private var cancellables = Set<AnyCancellable>()
+    
+    deinit {
+        cancellables.forEach{ $0.cancel() }
+        cancellables.removeAll()
+    }
     
     override var representedObject: Any? {
         didSet {
             // Update the view, if already loaded.
-            guard let viewModel = representedObject as? ViewModel else { return }
-            self.viewModel = viewModel
+            guard let viewModel = representedObject as? ViewModel,
+                  isViewLoaded else { return }
             
             rulerView.viewModel = viewModel
             overlayView.viewModel = viewModel
             waveformView.viewModel = viewModel
+            
+            viewModel.$error
+                .receive(on: DispatchQueue.main)
+                .sink { newValue in
+                    if let newValue = newValue {
+                        let alert = NSAlert()
+                        alert.alertStyle = .critical
+                        alert.messageText = "Something went wrong!"
+                        alert.informativeText = newValue.localizedDescription
+                        alert.runModal()
+                    }
+                }
+                .store(in: &cancellables)
+            
+            viewModel.$playerState
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] newValue in
+                    switch newValue {
+                    case .stopped:
+                        self?.playButton.image = NSImage(systemSymbolName: .play, accessibilityDescription: "")
+                    case .paused:
+                        self?.playButton.image = NSImage(systemSymbolName: .play, accessibilityDescription: "")
+                    case .playing:
+                        self?.playButton.image = NSImage(systemSymbolName: .pause, accessibilityDescription: "")
+                    }
+                }
+                .store(in: &cancellables)
             
             viewModel.$currentTime
                 .receive(on: DispatchQueue.main)
@@ -73,7 +114,9 @@ class ViewController: NSViewController {
                     
                     self?.hintLabel.isHidden = newValue
                     self?.hintImageView.isHidden = newValue
-                    self?.statusLabel.stringValue = newValue ? "MP3  |  \((self?.viewModel?.sampleRate ?? 0.0) / Double(1000)) kHz  |  \(self?.viewModel?.channelCount == 2 ? "Stereo" : "Mono")  |  \(self?.viewModel?.duration.mmss() ?? "") min" : "Drop audio file to timeline or hit Cmd + O."
+                    
+                    self?.statusLabel.isHidden = !newValue
+                    self?.statusLabel.stringValue = self?.viewModel?.status ?? "--"
                 }
                 .store(in: &cancellables)
             
@@ -86,28 +129,20 @@ class ViewController: NSViewController {
         }
     }
     
-    private var cancellables = Set<AnyCancellable>()
-    
-    deinit {
-        cancellables.forEach{ $0.cancel() }
-        cancellables.removeAll()
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-    
     // MARK: - Actions
     @IBAction func actionBackwardEnd(_ sender: Any) {
         viewModel?.stop()
     }
     @IBAction func actionBackward(_ sender: Any) {
+        viewModel?.backward()
     }
     @IBAction func actionPlay(_ sender: Any) {
         viewModel?.play()
     }
     @IBAction func actionForward(_ sender: Any) {
+        viewModel?.forward()
     }
     @IBAction func actionRepeat(_ sender: Any) {
+        viewModel?.looped.toggle()
     }
 }
