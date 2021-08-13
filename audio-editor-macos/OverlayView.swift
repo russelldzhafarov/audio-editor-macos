@@ -12,7 +12,7 @@ extension NSColor {
         NSColor.systemRed
     }
     static var selectionColor: NSColor {
-        NSColor.cursorColor.withAlphaComponent(0.3)
+        NSColor.keyboardFocusIndicatorColor.withAlphaComponent(0.3)
     }
     static var highlightColor: NSColor {
         NSColor.keyboardFocusIndicatorColor.withAlphaComponent(0.2)
