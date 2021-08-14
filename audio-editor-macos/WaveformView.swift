@@ -33,19 +33,20 @@ class WaveformView: NSView {
         guard let viewModel = viewModel,
               let ctx = NSGraphicsContext.current?.cgContext else { return }
         
+        // Draw background
+        ctx.setFillColor(NSColor.waveformBackgroundColor.cgColor)
+        ctx.fill(bounds)
+        
         let startTime = viewModel.visibleTimeRange.lowerBound
         let endTime = viewModel.visibleTimeRange.upperBound
         
-        let duration = endTime - startTime
-        let pxPerSec = bounds.width / CGFloat(duration)
+        let duration = viewModel.visibleDur
+        let oneSecWidth = bounds.width / CGFloat(duration)
         
-        let frame = CGRect(x: CGFloat(-startTime) * pxPerSec,
-                           y: CGFloat(0),
-                           width: CGFloat(viewModel.duration) * pxPerSec,
+        let frame = CGRect(x: .zero,
+                           y: .zero,
+                           width: CGFloat(viewModel.duration) * oneSecWidth,
                            height: bounds.height)
-        
-        ctx.setFillColor(NSColor.waveformBackgroundColor.cgColor)
-        ctx.fill(bounds)
         
         let lineWidth = CGFloat(1)
         let stepInPx = CGFloat(1)
@@ -56,7 +57,7 @@ class WaveformView: NSView {
         guard stepInSec > 0 else { return }
         
         var x = frame.origin.x
-        for time in stride(from: 0.0, to: viewModel.duration, by: stepInSec) {
+        for time in stride(from: startTime, to: endTime, by: stepInSec) {
             let power = viewModel.power(at: time)
             
             let heigth = max(CGFloat(1),
