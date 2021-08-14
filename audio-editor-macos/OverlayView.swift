@@ -157,8 +157,8 @@ class OverlayView: NSView {
         
         let pxPerSec = bounds.width / CGFloat(endTime - startTime)
         
-        // Draw selection
         if !viewModel.selectedTimeRange.isEmpty {
+            // Draw selection
             let timeRange = viewModel.selectedTimeRange.clamped(to: viewModel.visibleTimeRange)
             
             guard !timeRange.isEmpty else { return }
@@ -167,9 +167,26 @@ class OverlayView: NSView {
             
             let startPos = CGFloat(timeRange.lowerBound - viewModel.visibleTimeRange.lowerBound) * pxPerSec
             
+            // Draw selection borders
+            ctx.move(to: CGPoint(x: startPos,
+                                 y: CGFloat(30)))
+            ctx.addLine(to: CGPoint(x: startPos,
+                                    y: bounds.height))
+            
+            let endPos = startPos + CGFloat(duration) * pxPerSec
+            ctx.move(to: CGPoint(x: endPos,
+                                 y: CGFloat(30)))
+            ctx.addLine(to: CGPoint(x: endPos,
+                                    y: bounds.height))
+            
+            ctx.setLineWidth(CGFloat(1))
+            ctx.setStrokeColor(NSColor.keyboardFocusIndicatorColor.cgColor)
+            ctx.strokePath()
+            
+            // Draw selection background
             ctx.setFillColor(NSColor.selectionColor.cgColor)
             ctx.fill(CGRect(x: startPos,
-                            y: CGFloat(0),
+                            y: CGFloat(30),
                             width: CGFloat(duration) * pxPerSec,
                             height: bounds.height))
         }
