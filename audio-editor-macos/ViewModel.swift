@@ -29,6 +29,12 @@ extension AVAudioPCMBuffer {
     }
 }
 
+extension ViewModel.ReadAudioError: LocalizedError {
+    var errorDescription: String? {
+        return "Can't read the audio file, please try again later."
+    }
+}
+
 class ViewModel: ObservableObject {
     enum PlayerState {
         case playing, stopped, paused
