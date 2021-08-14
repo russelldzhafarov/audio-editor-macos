@@ -32,10 +32,15 @@ extension Double {
         let intDiv = Double(Int(self / nearest))
         return intDiv * nearest
     }
+    func round(nearest: Double) -> Double {
+        let n = 1/nearest
+        let numberToRound = self * n
+        return numberToRound.rounded() / n
+    }
 }
 extension NSColor {
     static var rulerColor: NSColor {
-        NSColor(red: 63.0/255.0, green: 69.0/255.0, blue: 85.0/255.0, alpha: 1.0)
+        NSColor(red: 83.0/255.0, green: 89.0/255.0, blue: 105.0/255.0, alpha: 1.0)
     }
     static var rulerLabelColor: NSColor {
         NSColor(red: 142.0/255.0, green: 150.0/255.0, blue: 171.0/255.0, alpha: 1.0)
@@ -72,40 +77,70 @@ class RulerView: NSView {
         }
         
         let startTime = viewModel.visibleTimeRange.lowerBound
-        let endTime = viewModel.visibleTimeRange.upperBound
         
-        let duration = endTime - startTime
-        let pxPerSec = bounds.width / CGFloat(duration)
+        let visibleDur = viewModel.visibleDur
+        let oneSecWidth = bounds.width / CGFloat(visibleDur)
         
-        let stepInSeconds: TimeInterval
-        switch pxPerSec {
-        case 0 ..< 10: stepInSeconds = 10
-        case 10 ..< 15: stepInSeconds = 5
-        case 15 ..< 50: stepInSeconds = 3
-        case 50 ..< 100: stepInSeconds = 1
-        case 100 ..< 200: stepInSeconds = 0.5
-        default: stepInSeconds = 0.25
+        let step: TimeInterval
+        switch oneSecWidth {
+        case 0 ..< 5:
+            let koeff = Double(bounds.width) / Double(85)
+            step = max(10, (visibleDur / koeff).round(nearest: 10))
+            
+        case 5 ..< 10: step = 15
+        case 10 ..< 15: step = 10
+        case 15 ..< 50: step = 5
+        case 50 ..< 100: step = 3
+        case 100 ..< 200: step = 1
+        case 200 ..< 300: step = 0.5
+        default: step = 0.25
         }
         
-        let fixedStartTime = startTime.floor(nearest: stepInSeconds)
+        let fixedStartTime = startTime.floor(nearest: step)
+        let x = CGFloat(fixedStartTime - startTime) * oneSecWidth
         
-        var x = CGFloat(fixedStartTime - startTime) * pxPerSec
-        for time in stride(from: fixedStartTime, to: endTime, by: stepInSeconds) {
+        drawTicks(to: ctx,
+                  startPos: x,
+                  startTime: fixedStartTime,
+                  endTime: viewModel.visibleTimeRange.upperBound,
+                  stepInSec: step / Double(10),
+                  stepInPx: oneSecWidth * CGFloat(step) / CGFloat(10),
+                  height: CGFloat(8),
+                  drawLabel: false,
+                  lineWidth: CGFloat(1))
+        
+        drawTicks(to: ctx,
+                  startPos: x,
+                  startTime: fixedStartTime,
+                  endTime: viewModel.visibleTimeRange.upperBound,
+                  stepInSec: step,
+                  stepInPx: oneSecWidth * CGFloat(step),
+                  height: CGFloat(12),
+                  drawLabel: true,
+                  lineWidth: CGFloat(2))
+    }
+    
+    private func drawTicks(to ctx: CGContext, startPos: CGFloat, startTime: TimeInterval, endTime: TimeInterval, stepInSec: TimeInterval, stepInPx: CGFloat, height: CGFloat, drawLabel: Bool, lineWidth: CGFloat) {
+        
+        var x = startPos
+        for time in stride(from: startTime, to: endTime, by: stepInSec) {
             
-            NSString(string: stepInSeconds < 1 ? time.mmssms() : time.mmss())
-                .draw(at: NSPoint(x: x + CGFloat(4), y: CGFloat(2)),
-                      withAttributes: attributes)
+            if drawLabel {
+                NSString(string: stepInSec < 1 ? time.mmssms() : time.mmss())
+                    .draw(at: NSPoint(x: x, y: .zero),
+                          withAttributes: attributes)
+            }
             
             ctx.move(to: CGPoint(x: x,
-                                 y: bounds.height - CGFloat(8)))
+                                 y: bounds.height - height))
             
             ctx.addLine(to: CGPoint(x: x,
                                     y: bounds.height))
             
-            x += pxPerSec * CGFloat(stepInSeconds)
+            x += stepInPx
         }
         
-        ctx.setLineWidth(CGFloat(1))
+        ctx.setLineWidth(lineWidth)
         ctx.setStrokeColor(NSColor.rulerColor.cgColor)
         ctx.strokePath()
     }
