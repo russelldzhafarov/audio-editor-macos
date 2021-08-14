@@ -800,18 +800,18 @@
                                         </textFieldCell>
                                     </textField>
                                     <button translatesAutoresizingMaskIntoConstraints="NO" id="KDE-hq-DhO">
-                                        <rect key="frame" x="160" y="24.5" width="22" height="21"/>
+                                        <rect key="frame" x="160" y="25.5" width="16" height="20"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="16" id="Cty-oG-EUS"/>
-                                            <constraint firstAttribute="width" constant="22" id="fr7-os-MdO"/>
+                                            <constraint firstAttribute="width" constant="16" id="fr7-os-MdO"/>
                                         </constraints>
-                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="repeat" catalog="system" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="WVg-vo-wwC">
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="forward.end.fill" catalog="system" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="WVg-vo-wwC">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
                                         <color key="contentTintColor" name="labelColor"/>
                                         <connections>
-                                            <action selector="actionRepeat:" target="5gI-5U-AMq" id="QhU-Yp-ghM"/>
+                                            <action selector="actionForwardEnd:" target="5gI-5U-AMq" id="62d-WU-ez8"/>
                                         </connections>
                                     </button>
                                     <button translatesAutoresizingMaskIntoConstraints="NO" id="GGv-Mw-bme">
@@ -986,9 +986,9 @@
         <image name="arrow.down.circle" catalog="system" width="15" height="15"/>
         <image name="backward.end.fill" catalog="system" width="15" height="13"/>
         <image name="backward.fill" catalog="system" width="19" height="12"/>
+        <image name="forward.end.fill" catalog="system" width="15" height="13"/>
         <image name="forward.fill" catalog="system" width="19" height="12"/>
         <image name="play.fill" catalog="system" width="12" height="13"/>
-        <image name="repeat" catalog="system" width="17" height="14"/>
         <namedColor name="labelColor">
             <color red="0.63529411764705879" green="0.66666666666666663" blue="0.74901960784313726" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
