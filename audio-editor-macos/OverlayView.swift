@@ -174,19 +174,31 @@ class OverlayView: NSView {
                             height: bounds.height))
         }
         
-        // Draw cursor
         if (startTime ..< endTime).contains(viewModel.currentTime) {
-            
+            // Draw cursor
             let cursorPos = CGFloat(viewModel.currentTime - viewModel.visibleTimeRange.lowerBound) * pxPerSec
             
             ctx.move(to: CGPoint(x: cursorPos,
-                                 y: CGFloat(0)))
+                                 y: CGFloat(22)))
             ctx.addLine(to: CGPoint(x: cursorPos,
                                     y: bounds.height))
             
             ctx.setStrokeColor(NSColor.cursorColor.cgColor)
             ctx.setLineWidth(CGFloat(1))
             ctx.strokePath()
+            
+            // Draw cursor handle
+            ctx.move(to: CGPoint(x: cursorPos - CGFloat(4),
+                                 y: CGFloat(22)))
+            ctx.addLine(to: CGPoint(x: cursorPos + CGFloat(4),
+                                    y: CGFloat(22)))
+            ctx.addLine(to: CGPoint(x: cursorPos,
+                                    y: CGFloat(30)))
+            ctx.addLine(to: CGPoint(x: cursorPos - CGFloat(4),
+                                    y: CGFloat(22)))
+            ctx.closePath()
+            ctx.setFillColor(NSColor.cursorColor.cgColor)
+            ctx.fillPath()
         }
     }
 }
