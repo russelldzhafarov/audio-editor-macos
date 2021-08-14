@@ -78,7 +78,7 @@ class ViewModel: ObservableObject {
         if wasPlaying {
             stop()
         }
-        currentTime = time
+        currentTime = time.clamped(to: 0.0...duration)
         if wasPlaying {
             play()
         }
@@ -101,7 +101,23 @@ class ViewModel: ObservableObject {
                                     format: nil)
                 
                 if selectedTimeRange.isEmpty {
-                    audioPlayer.scheduleBuffer(audioData.pcmBuffer)
+                    if currentTime == 0 {
+                        audioPlayer.scheduleBuffer(audioData.pcmBuffer) { [weak self] in
+                            self?.playerState = .stopped
+                        }
+                    } else {
+                        let from = AVAudioFramePosition(currentTime * audioData.sampleData.sampleRate)
+                        let to = AVAudioFramePosition(duration * audioData.sampleData.sampleRate)
+                        
+                        guard let segment = audioData.pcmBuffer.segment(from: from, to: to) else {
+                            throw ReadAudioError()
+                        }
+                        
+                        audioPlayer.scheduleBuffer(segment) { [weak self] in
+                            self?.playerState = .stopped
+                        }
+                    }
+                    
                 } else {
                     
                     let from = AVAudioFramePosition(selectedTimeRange.lowerBound * audioData.sampleData.sampleRate)
@@ -111,7 +127,9 @@ class ViewModel: ObservableObject {
                         throw ReadAudioError()
                     }
                     
-                    audioPlayer.scheduleBuffer(segment)
+                    audioPlayer.scheduleBuffer(segment) { [weak self] in
+                        self?.playerState = .stopped
+                    }
                 }
                 
                 try audioEngine.start()
@@ -130,12 +148,10 @@ class ViewModel: ObservableObject {
         playerState = .stopped
     }
     func forward() {
-        let time = (currentTime + TimeInterval(15)).clamped(to: 0.0...duration)
-        seek(to: time)
+        seek(to: currentTime + TimeInterval(15))
     }
     func backward() {
-        let time = (currentTime - TimeInterval(15)).clamped(to: 0.0...duration)
-        seek(to: time)
+        seek(to: currentTime - TimeInterval(15))
     }
     
     public func power(at time: TimeInterval) -> Float {

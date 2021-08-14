@@ -84,7 +84,7 @@ class OverlayView: NSView {
             
             if start.equalTo(end) {
                 viewModel.selectedTimeRange = 0.0 ..< 0.0
-                viewModel.seek(to: startTime.clamped(to: 0.0...viewModel.duration))
+                viewModel.currentTime = startTime.clamped(to: 0.0...viewModel.duration)
                 
             } else {
                 
@@ -100,11 +100,12 @@ class OverlayView: NSView {
                     
                 } else {
                     viewModel.selectedTimeRange = 0.0 ..< 0.0
-                    viewModel.seek(to: startTime.clamped(to: 0.0...viewModel.duration))
+                    viewModel.currentTime = startTime.clamped(to: 0.0...viewModel.duration)
                 }
             }
             
             if nextEvent.type == .leftMouseUp {
+                viewModel.seek(to: viewModel.currentTime)
                 break
             }
         }
