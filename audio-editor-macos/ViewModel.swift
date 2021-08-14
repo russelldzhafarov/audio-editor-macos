@@ -11,6 +11,8 @@ import Accelerate
 
 extension AVAudioPCMBuffer {
     func segment(from startFrame: AVAudioFramePosition, to endFrame: AVAudioFramePosition) -> AVAudioPCMBuffer? {
+        guard endFrame > startFrame else { return nil }
+        
         let framesToCopy = AVAudioFrameCount(endFrame - startFrame)
         guard let segment = AVAudioPCMBuffer(pcmFormat: self.format, frameCapacity: framesToCopy) else { return nil }
         
