@@ -131,7 +131,7 @@ class ViewController: NSViewController {
     
     // MARK: - Actions
     @IBAction func actionBackwardEnd(_ sender: Any) {
-        viewModel?.stop()
+        viewModel?.backwardEnd()
     }
     @IBAction func actionBackward(_ sender: Any) {
         viewModel?.backward()
@@ -142,7 +142,7 @@ class ViewController: NSViewController {
     @IBAction func actionForward(_ sender: Any) {
         viewModel?.forward()
     }
-    @IBAction func actionRepeat(_ sender: Any) {
-        viewModel?.looped.toggle()
+    @IBAction func actionForwardEnd(_ sender: Any) {
+        viewModel?.forwardEnd()
     }
 }
