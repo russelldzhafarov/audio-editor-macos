@@ -133,7 +133,7 @@ class OverlayView: NSView {
               let fileURL = NSURL(from: pboard) else { return false }
         
         viewModel?.highlighted = false
-        viewModel?.openAudioFile(at: fileURL as URL)
+        viewModel?.readAudioFile(at: fileURL as URL)
         
         return true
     }

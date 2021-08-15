@@ -63,6 +63,12 @@ class ViewModel: ObservableObject {
     private let audioEngine = AVAudioEngine()
     private let audioPlayer = AVAudioPlayerNode()
     
+    private let serviceQueue: OperationQueue = {
+        let q = OperationQueue()
+        q.maxConcurrentOperationCount = 1
+        return q
+    }()
+    
     @Published var error: Error?
     
     var status: String? {
@@ -181,78 +187,22 @@ class ViewModel: ObservableObject {
         }
     }
     
-    func openAudioFile(at url: URL) {
-        do {
-            let file = try AVAudioFile(forReading: url)
-            
-            guard let format = AVAudioFormat(commonFormat: .pcmFormatFloat32,
-                                             sampleRate: file.fileFormat.sampleRate,
-                                             channels: file.fileFormat.channelCount,
-                                             interleaved: false)
-            else {
-                throw ReadAudioError()
+    func readAudioFile(at url: URL) {
+        let op = ReadAudioFileOperation(fileUrl: url)
+        op.completionBlock = {
+            switch op.result {
+            case .success(let audioFile):
+                self.audioFile = audioFile
+                self.visibleTimeRange = 0.0 ..< audioFile.duration
+                self.loaded = true
+                
+            case .failure(let error):
+                self.error = error
+                
+            case .none:
+                break
             }
-            
-            let asset = AVAsset(url: url)
-            
-            guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: UInt32(file.length)) else {
-                throw ReadAudioError()
-            }
-            
-            try file.read(into: buffer)
-            
-            let leftAmps = Array(UnsafeBufferPointer(start: buffer.floatChannelData?[0], count:Int(buffer.frameLength)))
-            let rightAmps = Array(UnsafeBufferPointer(start: buffer.floatChannelData?[1], count:Int(buffer.frameLength)))
-            
-            let compressedAmps = compress(leftAmps, compression: 500)
-            let compressedSampleRate = Double(compressedAmps.count) / asset.duration.seconds
-            
-            audioData = AudioData(fileFormat: url.pathExtension,
-                                  duration: asset.duration.seconds,
-                                  channelCount: Int(file.fileFormat.channelCount),
-                                  pcmBuffer: buffer,
-                                  sampleData: AudioSampleData(sampleRate: file.fileFormat.sampleRate,
-                                                              lamps: leftAmps,
-                                                              ramps: rightAmps),
-                                  compressedData: AudioSampleData(sampleRate: compressedSampleRate,
-                                                                  lamps: compressedAmps,
-                                                                  ramps: []))
-            
-            visibleTimeRange = 0.0 ..< asset.duration.seconds
-            loaded = true
-            
-        } catch {
-            self.error = error
         }
-    }
-    
-    func compress(_ inputSignal: [Float], compression: Int) -> [Float] {
-        
-        var processingBuffer = [Float](repeating: 0.0,
-                                       count: Int(inputSignal.count))
-        
-        // Take the absolute values to get amplitude
-        vDSP_vabs(inputSignal,                      // Single-precision real input vector.
-                  1,                                // Stride size for A.
-                  &processingBuffer,                // Single-precision real output vector.
-                  1,                                // Address stride for C.
-                  vDSP_Length(inputSignal.count))   // The number of elements to process.
-        
-        let filter = [Float](repeating: 1.0 / Float(compression),
-                             count: Int(compression))
-        
-        let downSampledLength = inputSignal.count / compression
-        
-        var downSampledData = [Float](repeating: 0.0,
-                                      count: downSampledLength)
-        
-        vDSP_desamp(processingBuffer,               // Input signal.
-                    vDSP_Stride(compression),       // Decimation Factor.
-                    filter,                         // Filter.
-                    &downSampledData,               // Output.
-                    vDSP_Length(downSampledLength), // Output length.
-                    vDSP_Length(compression))       // Filter length.
-        
-        return downSampledData
+        serviceQueue.addOperation(op)
     }
 }
