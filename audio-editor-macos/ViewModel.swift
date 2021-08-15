@@ -42,21 +42,6 @@ class ViewModel: ObservableObject {
     struct ReadAudioError: Error {
     }
     
-    struct AudioData {
-        let fileFormat: String
-        let duration: TimeInterval
-        let channelCount: Int
-        let pcmBuffer: AVAudioPCMBuffer
-        let sampleData: AudioSampleData
-        let compressedData: AudioSampleData
-    }
-    
-    struct AudioSampleData {
-        let sampleRate: Double
-        let lamps: [Float]
-        let ramps: [Float]
-    }
-    
     @Published var selectedTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
     @Published var visibleTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
     @Published var currentTime: TimeInterval = 0.0
@@ -66,10 +51,14 @@ class ViewModel: ObservableObject {
     var looped = true
     
     var duration: TimeInterval {
-        audioData?.duration ?? TimeInterval(0)
+        audioFile?.duration ?? TimeInterval(0)
     }
     
-    var audioData: AudioData?
+    var visibleDur: TimeInterval {
+        visibleTimeRange.upperBound - visibleTimeRange.lowerBound
+    }
+    
+    var audioFile: AudioFile?
     
     private let audioEngine = AVAudioEngine()
     private let audioPlayer = AVAudioPlayerNode()
@@ -77,8 +66,8 @@ class ViewModel: ObservableObject {
     @Published var error: Error?
     
     var status: String? {
-        guard let audioData = audioData else { return nil }
-        return "\(audioData.fileFormat)  |  \(audioData.sampleData.sampleRate / Double(1000)) kHz  |  \(audioData.channelCount == 1 ? "Mono" : "Stereo")  |  \(audioData.duration.mmss())"
+        guard let audioFile = audioFile else { return nil }
+        return "\(audioFile.fileFormat)  |  \(audioFile.sampleData.sampleRate / Double(1000)) kHz  |  \(audioFile.channelCount == 1 ? "Mono" : "Stereo")  |  \(audioFile.duration.mmss())"
     }
     
     func seek(to time: TimeInterval) {
@@ -99,7 +88,7 @@ class ViewModel: ObservableObject {
             
         case .paused, .stopped:
             do {
-                guard let audioData = audioData else {
+                guard let audioFile = audioFile else {
                     throw ReadAudioError()
                 }
                 
@@ -110,14 +99,14 @@ class ViewModel: ObservableObject {
                 
                 if selectedTimeRange.isEmpty {
                     if currentTime == 0 {
-                        audioPlayer.scheduleBuffer(audioData.pcmBuffer) { [weak self] in
+                        audioPlayer.scheduleBuffer(audioFile.pcmBuffer) { [weak self] in
                             self?.playerState = .stopped
                         }
                     } else {
-                        let from = AVAudioFramePosition(currentTime * audioData.sampleData.sampleRate)
-                        let to = AVAudioFramePosition(duration * audioData.sampleData.sampleRate)
+                        let from = AVAudioFramePosition(currentTime * audioFile.sampleData.sampleRate)
+                        let to = AVAudioFramePosition(duration * audioFile.sampleData.sampleRate)
                         
-                        guard let segment = audioData.pcmBuffer.segment(from: from, to: to) else {
+                        guard let segment = audioFile.pcmBuffer.segment(from: from, to: to) else {
                             throw ReadAudioError()
                         }
                         
@@ -128,10 +117,10 @@ class ViewModel: ObservableObject {
                     
                 } else {
                     
-                    let from = AVAudioFramePosition(selectedTimeRange.lowerBound * audioData.sampleData.sampleRate)
-                    let to = AVAudioFramePosition(selectedTimeRange.upperBound * audioData.sampleData.sampleRate)
+                    let from = AVAudioFramePosition(selectedTimeRange.lowerBound * audioFile.sampleData.sampleRate)
+                    let to = AVAudioFramePosition(selectedTimeRange.upperBound * audioFile.sampleData.sampleRate)
                     
-                    guard let segment = audioData.pcmBuffer.segment(from: from, to: to) else {
+                    guard let segment = audioFile.pcmBuffer.segment(from: from, to: to) else {
                         throw ReadAudioError()
                     }
                     
@@ -163,7 +152,7 @@ class ViewModel: ObservableObject {
     }
     
     public func power(at time: TimeInterval) -> Float {
-        guard let sampleData = audioData?.compressedData else { return 0.0 }
+        guard let sampleData = audioFile?.compressedData else { return 0.0 }
         
         let index = Int(time * sampleData.sampleRate)
         
