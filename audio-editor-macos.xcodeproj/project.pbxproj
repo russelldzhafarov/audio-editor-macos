@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		90091B5D26C17689004072E5 /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90091B5C26C17689004072E5 /* WindowController.swift */; };
+		9026F2A626C96DA100B1CAEF /* ReadAudioFileOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9026F2A526C96DA100B1CAEF /* ReadAudioFileOperation.swift */; };
+		9026F2A926C96F2000B1CAEF /* AudioFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9026F2A826C96F2000B1CAEF /* AudioFile.swift */; };
 		905BF56726C21F740010DBC2 /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905BF56626C21F740010DBC2 /* OverlayView.swift */; };
 		905BF56B26C23E7A0010DBC2 /* RulerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905BF56A26C23E7A0010DBC2 /* RulerView.swift */; };
 		908BBCD126C1A0E000C7D906 /* WaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 908BBCD026C1A0E000C7D906 /* WaveformView.swift */; };
@@ -21,6 +23,8 @@
 
 /* Begin PBXFileReference section */
 		90091B5C26C17689004072E5 /* WindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowController.swift; sourceTree = "<group>"; };
+		9026F2A526C96DA100B1CAEF /* ReadAudioFileOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadAudioFileOperation.swift; sourceTree = "<group>"; };
+		9026F2A826C96F2000B1CAEF /* AudioFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFile.swift; sourceTree = "<group>"; };
 		905BF56626C21F740010DBC2 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
 		905BF56A26C23E7A0010DBC2 /* RulerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulerView.swift; sourceTree = "<group>"; };
 		908BBCD026C1A0E000C7D906 /* WaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformView.swift; sourceTree = "<group>"; };
@@ -73,10 +77,12 @@
 				905BF56626C21F740010DBC2 /* OverlayView.swift */,
 				905BF56A26C23E7A0010DBC2 /* RulerView.swift */,
 				908BBCD426C1A75000C7D906 /* ViewModel.swift */,
+				9026F2A826C96F2000B1CAEF /* AudioFile.swift */,
 				90E2A7B226C171640026CB1C /* Assets.xcassets */,
 				90E2A7B426C171640026CB1C /* Main.storyboard */,
 				90E2A7B726C171640026CB1C /* Info.plist */,
 				90E2A7B826C171640026CB1C /* audio_editor_macos.entitlements */,
+				9026F2A526C96DA100B1CAEF /* ReadAudioFileOperation.swift */,
 			);
 			path = "audio-editor-macos";
 			sourceTree = "<group>";
@@ -152,7 +158,9 @@
 			files = (
 				90E2A7AF26C1715F0026CB1C /* ViewController.swift in Sources */,
 				90091B5D26C17689004072E5 /* WindowController.swift in Sources */,
+				9026F2A626C96DA100B1CAEF /* ReadAudioFileOperation.swift in Sources */,
 				905BF56726C21F740010DBC2 /* OverlayView.swift in Sources */,
+				9026F2A926C96F2000B1CAEF /* AudioFile.swift in Sources */,
 				908BBCD126C1A0E000C7D906 /* WaveformView.swift in Sources */,
 				908BBCD526C1A75000C7D906 /* ViewModel.swift in Sources */,
 				90E2A7AD26C1715F0026CB1C /* AppDelegate.swift in Sources */,
