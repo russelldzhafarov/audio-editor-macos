@@ -45,7 +45,6 @@ class ViewModel: ObservableObject {
     @Published var selectedTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
     @Published var visibleTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
     @Published var currentTime: TimeInterval = 0.0
-    @Published var playerState = PlayerState.stopped
     @Published var highlighted = false
     @Published var loaded = false
     var looped = true
@@ -70,6 +69,43 @@ class ViewModel: ObservableObject {
     }()
     
     @Published var error: Error?
+    
+    private var timer: Timer?
+    
+    private var currentFrame: AVAudioFramePosition {
+        guard
+            let lastRenderTime = audioPlayer.lastRenderTime,
+            let playerTime = audioPlayer.playerTime(forNodeTime: lastRenderTime)
+        else {
+            return 0
+        }
+        
+        return playerTime.sampleTime
+    }
+    
+    @Published var playerState = PlayerState.stopped {
+        didSet {
+            switch playerState {
+            case .playing:
+                let seekTime = currentTime
+                timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(0.025), repeats: true) { [weak self] _ in
+                    guard let strongSelf = self,
+                          let audioFile = strongSelf.audioFile else { return }
+                    
+                    strongSelf.currentTime = seekTime + (Double(strongSelf.currentFrame) / audioFile.sampleData.sampleRate)
+                }
+                
+            case .paused, .stopped:
+                timer?.invalidate()
+                timer = nil
+            }
+        }
+    }
+    
+    deinit {
+        timer?.invalidate()
+        timer = nil
+    }
     
     var status: String? {
         guard let audioFile = audioFile else { return nil }
