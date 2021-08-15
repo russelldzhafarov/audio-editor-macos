@@ -187,10 +187,20 @@ class ViewModel: ObservableObject {
         playerState = .stopped
     }
     func forward() {
+        selectedTimeRange = 0.0 ..< 0.0
         seek(to: currentTime + TimeInterval(15))
     }
+    func forwardEnd() {
+        selectedTimeRange = 0.0 ..< 0.0
+        seek(to: duration)
+    }
     func backward() {
+        selectedTimeRange = 0.0 ..< 0.0
         seek(to: currentTime - TimeInterval(15))
+    }
+    func backwardEnd() {
+        selectedTimeRange = 0.0 ..< 0.0
+        seek(to: TimeInterval(0))
     }
     
     public func power(at time: TimeInterval) -> Float {
