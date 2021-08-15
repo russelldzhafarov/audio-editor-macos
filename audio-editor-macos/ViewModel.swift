@@ -212,7 +212,7 @@ class ViewModel: ObservableObject {
         
         let power = sampleData.lamps[index]
         
-        let avgPower = 20 * log2(power)
+        let avgPower = 20 * log10(power)
         
         return scaledPower(power: avgPower)
     }
