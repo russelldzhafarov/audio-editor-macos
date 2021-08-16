@@ -1,5 +1,5 @@
 //
-//  ReadAudioFileOperation.swift
+//  ReadAudioOperation.swift
 //  audio-editor-macos
 //
 //  Created by russell.dzhafarov@gmail.com on 15.08.2021.
@@ -8,17 +8,7 @@
 import AVFoundation
 import Accelerate
 
-extension ReadAudioFileOperation.ReadAudioFileError: LocalizedError {
-    var errorDescription: String? {
-        return "Can't read the audio file, please try again later."
-    }
-}
-
-class ReadAudioFileOperation: Operation {
-    struct ReadAudioFileError: Error {
-    }
-    
-    var result: Result<AudioFile, Error>?
+class ReadAudioOperation: ResultOperation<AudioFile> {
     
     let fileUrl: URL
     
@@ -28,7 +18,7 @@ class ReadAudioFileOperation: Operation {
     }
     
     override func main() {
-        let startTime = CACurrentMediaTime()
+        let time = CACurrentMediaTime()
         
         do {
             let file = try AVAudioFile(forReading: fileUrl)
@@ -38,45 +28,41 @@ class ReadAudioFileOperation: Operation {
                                              channels: file.fileFormat.channelCount,
                                              interleaved: false)
             else {
-                throw ReadAudioFileError()
+                throw AudioBufferError()
             }
             
             let asset = AVAsset(url: fileUrl)
             
             guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: UInt32(file.length)) else {
-                throw ReadAudioFileError()
+                throw AudioBufferError()
             }
             
             try file.read(into: buffer)
             
-            let leftAmps = Array(UnsafeBufferPointer(start: buffer.floatChannelData?[0], count:Int(buffer.frameLength)))
-            let rightAmps = Array(UnsafeBufferPointer(start: buffer.floatChannelData?[1], count:Int(buffer.frameLength)))
+            var amps = Array(UnsafeBufferPointer(start: buffer.floatChannelData?[0], count:Int(buffer.frameLength)))
             
-            let compression = asset.duration.seconds.rounded()
-            let compressedAmps = compress(leftAmps, compression: Int(compression))
-            let compressedSampleRate = Double(compressedAmps.count) / asset.duration.seconds
+            amps = compress(amps, compression: Int(asset.duration.seconds * 10))
+            let compressedSampleRate = Double(amps.count) / asset.duration.seconds
             
             result = .success(
                 AudioFile(fileFormat: fileUrl.pathExtension,
                           duration: asset.duration.seconds,
+                          sampleRate: file.fileFormat.sampleRate,
                           channelCount: Int(file.fileFormat.channelCount),
                           pcmBuffer: buffer,
-                          sampleData: AudioSampleData(sampleRate: file.fileFormat.sampleRate,
-                                                      lamps: leftAmps,
-                                                      ramps: rightAmps),
                           compressedData: AudioSampleData(sampleRate: compressedSampleRate,
-                                                          lamps: compressedAmps,
-                                                          ramps: []))
+                                                          amps: amps))
             )
             
         } catch {
             result = .failure(error)
         }
         
-        print("Read audio file took: \(CACurrentMediaTime() - startTime) sec")
+        print("ReadAudioOperation took: \(CACurrentMediaTime() - time) sec")
     }
     
     func compress(_ inputSignal: [Float], compression: Int) -> [Float] {
+        let time = CACurrentMediaTime()
         
         var processingBuffer = [Float](repeating: 0.0,
                                        count: Int(inputSignal.count))
@@ -102,6 +88,8 @@ class ReadAudioFileOperation: Operation {
                     &downSampledData,               // Output.
                     vDSP_Length(downSampledLength), // Output length.
                     vDSP_Length(compression))       // Filter length.
+        
+        print("CompressOperation took: \(CACurrentMediaTime() - time) sec")
         
         return downSampledData
     }
