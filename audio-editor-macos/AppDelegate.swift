@@ -12,4 +12,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         NSApp.appearance = NSAppearance(named: .darkAqua)
     }
+    func applicationWillTerminate(_ notification: Notification) {
+        if NSPasteboard.general.data(forType: .audio)?.isEmpty == false {
+            NSPasteboard.general.clearContents()
+        }
+    }
 }
