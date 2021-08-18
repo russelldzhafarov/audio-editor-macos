@@ -34,10 +34,7 @@ class ScheduleBufferOperation: ResultOperation<Void> {
         let time = CACurrentMediaTime()
         
         if let timeRange = timeRange {
-            let from = AVAudioFramePosition(timeRange.lowerBound * audioFile.sampleRate)
-            let to = AVAudioFramePosition(timeRange.upperBound * audioFile.sampleRate)
-            
-            guard let segment = audioFile.pcmBuffer.segment(from: from, to: to) else {
+            guard let segment = AudioService.copy(buffer: audioFile.pcmBuffer, timeRange: timeRange) else {
                 result = .failure(AudioBufferError())
                 return
             }
@@ -49,10 +46,7 @@ class ScheduleBufferOperation: ResultOperation<Void> {
                 audioPlayer.scheduleBuffer(audioFile.pcmBuffer, completionHandler: completionHandler)
                 
             } else {
-                let from = AVAudioFramePosition(startTime * audioFile.sampleRate)
-                let to = AVAudioFramePosition(audioFile.pcmBuffer.frameLength)
-                
-                guard let segment = audioFile.pcmBuffer.segment(from: from, to: to) else {
+                guard startTime < audioFile.duration, let segment = AudioService.copy(buffer: audioFile.pcmBuffer, timeRange: startTime..<audioFile.duration) else {
                     result = .failure(AudioBufferError())
                     return
                 }
