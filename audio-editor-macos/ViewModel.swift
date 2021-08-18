@@ -89,6 +89,42 @@ class ViewModel: ObservableObject {
         return "\(pcmBuffer.sampleRate / Double(1000)) kHz  |  \(pcmBuffer.channelCount == 1 ? "Mono" : "Stereo")  |  \(pcmBuffer.duration.mmss())"
     }
     
+    // MARK: - Undo / Redo Operations
+    @objc func delete(start: TimeInterval, end: TimeInterval) {
+        guard let edited = pcmBuffer?.remove(startTime: start, endTime: end),
+              let removed = pcmBuffer?.copy(timeRange: start..<end) else {
+            self.error = EditError.delete
+            return
+        }
+        
+        undoManager.registerUndo(withTarget: self) { target in
+            target.paste(buffer: removed, at: start)
+        }
+        undoManager.setActionName("Delete")
+        
+        pcmBuffer = edited
+        amps = AudioService.compress(buffer: edited)
+        state = .ready
+        selectedTimeRange = nil
+    }
+    
+    @objc func paste(buffer: AVAudioPCMBuffer, at time: TimeInterval) {
+        guard let edited = pcmBuffer?.paste(buffer: buffer, at: time) else {
+            self.error = EditError.delete
+            return
+        }
+        
+        undoManager.registerUndo(withTarget: self) { target in
+            target.delete(start: time, end: time + buffer.duration)
+        }
+        undoManager.setActionName("Paste")
+        
+        pcmBuffer = edited
+        amps = AudioService.compress(buffer: edited)
+        state = .ready
+        selectedTimeRange = time ..< (time + Double(buffer.frameLength) / buffer.sampleRate)
+    }
+    
     func seek(to time: TimeInterval) {
         let wasPlaying = playerState == .playing
         if wasPlaying {
