@@ -7,17 +7,12 @@
 
 import AVFoundation
 
-struct AudioFile {
-    let fileFormat: String
-    let duration: TimeInterval
-    let channelCount: Int
-    let pcmBuffer: AVAudioPCMBuffer
-    let sampleData: AudioSampleData
-    let compressedData: AudioSampleData
-}
-
-struct AudioSampleData {
+class AudioSampleData {
     let sampleRate: Double
-    let lamps: [Float]
-    let ramps: [Float]
+    let amps: [Float]
+    
+    init(sampleRate: Double, amps: [Float]) {
+        self.sampleRate = sampleRate
+        self.amps = amps
+    }
 }

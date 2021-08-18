@@ -36,6 +36,10 @@ extension ViewModel.ReadAudioError: LocalizedError {
 }
 
 class ViewModel: ObservableObject {
+    
+    var pcmBuffer: AVAudioPCMBuffer?
+    var amps: [Float] = []
+    
     enum PlayerState {
         case playing, stopped, paused
     }
@@ -50,14 +54,12 @@ class ViewModel: ObservableObject {
     var looped = true
     
     var duration: TimeInterval {
-        audioFile?.duration ?? TimeInterval(0)
+        pcmBuffer?.duration ?? TimeInterval(0)
     }
     
     var visibleDur: TimeInterval {
         visibleTimeRange.upperBound - visibleTimeRange.lowerBound
     }
-    
-    var audioFile: AudioFile?
     
     private let audioEngine = AVAudioEngine()
     private let audioPlayer = AVAudioPlayerNode()
@@ -90,9 +92,9 @@ class ViewModel: ObservableObject {
                 let seekTime = currentTime
                 timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(0.025), repeats: true) { [weak self] _ in
                     guard let strongSelf = self,
-                          let audioFile = strongSelf.audioFile else { return }
+                          let pcmBuffer = strongSelf.pcmBuffer else { return }
                     
-                    strongSelf.currentTime = seekTime + (Double(strongSelf.currentFrame) / audioFile.sampleData.sampleRate)
+                    strongSelf.currentTime = seekTime + (Double(strongSelf.currentFrame) / pcmBuffer.sampleRate)
                 }
                 
             case .paused, .stopped:
@@ -108,8 +110,8 @@ class ViewModel: ObservableObject {
     }
     
     var status: String? {
-        guard let audioFile = audioFile else { return nil }
-        return "\(audioFile.fileFormat)  |  \(audioFile.sampleData.sampleRate / Double(1000)) kHz  |  \(audioFile.channelCount == 1 ? "Mono" : "Stereo")  |  \(audioFile.duration.mmss())"
+        guard let pcmBuffer = pcmBuffer else { return nil }
+        return "\(pcmBuffer.sampleRate / Double(1000)) kHz  |  \(pcmBuffer.channelCount == 1 ? "Mono" : "Stereo")  |  \(pcmBuffer.duration.mmss())"
     }
     
     func seek(to time: TimeInterval) {
@@ -129,56 +131,8 @@ class ViewModel: ObservableObject {
             stop()
             
         case .paused, .stopped:
-            do {
-                guard let audioFile = audioFile else {
-                    throw ReadAudioError()
-                }
-                
-                audioEngine.attach(audioPlayer)
-                audioEngine.connect(audioPlayer,
-                                    to: audioEngine.outputNode,
-                                    format: nil)
-                
-                if selectedTimeRange.isEmpty {
-                    if currentTime == 0 {
-                        audioPlayer.scheduleBuffer(audioFile.pcmBuffer) { [weak self] in
-                            self?.playerState = .stopped
-                        }
-                    } else {
-                        let from = AVAudioFramePosition(currentTime * audioFile.sampleData.sampleRate)
-                        let to = AVAudioFramePosition(duration * audioFile.sampleData.sampleRate)
-                        
-                        guard let segment = audioFile.pcmBuffer.segment(from: from, to: to) else {
-                            throw ReadAudioError()
-                        }
-                        
-                        audioPlayer.scheduleBuffer(segment) { [weak self] in
-                            self?.playerState = .stopped
-                        }
-                    }
-                    
-                } else {
-                    
-                    let from = AVAudioFramePosition(selectedTimeRange.lowerBound * audioFile.sampleData.sampleRate)
-                    let to = AVAudioFramePosition(selectedTimeRange.upperBound * audioFile.sampleData.sampleRate)
-                    
-                    guard let segment = audioFile.pcmBuffer.segment(from: from, to: to) else {
-                        throw ReadAudioError()
-                    }
-                    
-                    audioPlayer.scheduleBuffer(segment) { [weak self] in
-                        self?.playerState = .stopped
-                    }
-                }
-                
-                try audioEngine.start()
-                audioPlayer.play()
-                
-                playerState = .playing
-                
-            } catch {
-                self.error = error
-            }
+            guard let pcmBuffer = pcmBuffer else { return }
+            play(buffer: pcmBuffer)
         }
     }
     func stop() {
@@ -204,13 +158,14 @@ class ViewModel: ObservableObject {
     }
     
     public func power(at time: TimeInterval) -> Float {
-        guard let sampleData = audioFile?.compressedData else { return 0.0 }
+        guard let pcmBuffer = pcmBuffer else { return 0 }
+        let sampleRate = Double(amps.count) / pcmBuffer.duration
         
-        let index = Int(time * sampleData.sampleRate)
+        let index = Int(time * sampleRate)
         
-        guard sampleData.lamps.indices.contains(index) else { return 0.0 }
+        guard amps.indices.contains(index) else { return .zero }
         
-        let power = sampleData.lamps[index]
+        let power = amps[index]
         
         let avgPower = 20 * log10(power)
         
@@ -234,15 +189,20 @@ class ViewModel: ObservableObject {
     }
     
     func readAudioFile(at url: URL) {
-        let op = ReadAudioFileOperation(fileUrl: url)
+        state = .processing
+        
+        let op = ReadBufferOperation(fileUrl: url)
         op.completionBlock = {
+            self.state = .ready
+            
             switch op.result {
-            case .success(let audioFile):
-                self.audioFile = audioFile
-                self.visibleTimeRange = 0.0 ..< audioFile.duration
-                self.loaded = true
+            case .success(let pcmBuffer):
+                self.amps = AudioService.compress(buffer: pcmBuffer)
+                self.pcmBuffer = pcmBuffer
+                self.visibleTimeRange = 0.0 ..< pcmBuffer.duration
                 
             case .failure(let error):
+                
                 self.error = error
                 
             case .none:
