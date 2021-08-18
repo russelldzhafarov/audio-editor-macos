@@ -8,32 +8,7 @@
 import Combine
 import AVFoundation
 import Accelerate
-
-extension AVAudioPCMBuffer {
-    func segment(from startFrame: AVAudioFramePosition, to endFrame: AVAudioFramePosition) -> AVAudioPCMBuffer? {
-        guard endFrame > startFrame else { return nil }
-        
-        let framesToCopy = AVAudioFrameCount(endFrame - startFrame)
-        guard let segment = AVAudioPCMBuffer(pcmFormat: self.format, frameCapacity: framesToCopy) else { return nil }
-        
-        let sampleSize = self.format.streamDescription.pointee.mBytesPerFrame
-        
-        let srcPtr = UnsafeMutableAudioBufferListPointer(self.mutableAudioBufferList)
-        let dstPtr = UnsafeMutableAudioBufferListPointer(segment.mutableAudioBufferList)
-        for (src, dst) in zip(srcPtr, dstPtr) {
-            memcpy(dst.mData, src.mData?.advanced(by: Int(startFrame) * Int(sampleSize)), Int(framesToCopy) * Int(sampleSize))
-        }
-        
-        segment.frameLength = framesToCopy
-        return segment
-    }
-}
-
-extension ViewModel.ReadAudioError: LocalizedError {
-    var errorDescription: String? {
-        return "Can't read the audio file, please try again later."
-    }
-}
+import AppKit
 
 class ViewModel: ObservableObject {
     
