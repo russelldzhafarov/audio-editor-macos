@@ -7,7 +7,7 @@
 
 import AVFoundation
 
-class ReadAudioOperation: ResultOperation<AudioFile> {
+class ReadAudioOperation: ResultOperation<AVAudioPCMBuffer> {
     
     let fileUrl: URL
     
@@ -30,25 +30,13 @@ class ReadAudioOperation: ResultOperation<AudioFile> {
                 throw AudioBufferError()
             }
             
-            let asset = AVAsset(url: fileUrl)
-            
             guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: UInt32(file.length)) else {
                 throw AudioBufferError()
             }
             
             try file.read(into: buffer)
             
-            let downsampled = AudioService.compress(buffer: buffer)
-            
-            result = .success(
-                AudioFile(fileFormat: fileUrl.pathExtension,
-                          duration: asset.duration.seconds,
-                          sampleRate: file.fileFormat.sampleRate,
-                          channelCount: Int(file.fileFormat.channelCount),
-                          pcmBuffer: buffer,
-                          compressedData: AudioSampleData(sampleRate: downsampled.sampleRate,
-                                                          amps: downsampled.data))
-            )
+            result = .success(buffer)
             
         } catch {
             result = .failure(error)
