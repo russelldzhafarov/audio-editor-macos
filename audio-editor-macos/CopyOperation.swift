@@ -19,10 +19,7 @@ class CopyOperation: ResultOperation<Data> {
     }
     
     override func main() {
-        let from = AVAudioFramePosition(timeRange.lowerBound * audioFile.sampleRate)
-        let to = AVAudioFramePosition(timeRange.upperBound * audioFile.sampleRate)
-        
-        guard let segment = audioFile.pcmBuffer.segment(from: from, to: to) else {
+        guard let segment = AudioService.copy(buffer: audioFile.pcmBuffer, timeRange: timeRange) else {
             result = .failure(AudioBufferError())
             return
         }
