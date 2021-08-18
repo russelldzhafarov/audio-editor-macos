@@ -125,6 +125,36 @@ class ViewModel: ObservableObject {
         selectedTimeRange = time ..< (time + Double(buffer.frameLength) / buffer.sampleRate)
     }
     
+    func copy() {
+        guard let selectedTimeRange = selectedTimeRange,
+              let pcmBuffer = pcmBuffer else { return }
+        
+        state = .processing
+        let op = CopyBufferOperation(buffer: pcmBuffer, startTime: selectedTimeRange.lowerBound, endTime: selectedTimeRange.upperBound)
+        op.completionBlock = { [weak self] in
+            
+            defer {
+                self?.state = .ready
+            }
+            
+            switch op.result {
+            case .success(let buffer):
+                let pb = NSPasteboard.general
+                pb.clearContents()
+                pb.declareTypes([.audio], owner: nil)
+                let data = Data(buffer: buffer)
+                pb.setData(data, forType: .audio)
+                
+            case .failure(let error):
+                self?.error = error
+                
+            case .none:
+                break
+            }
+        }
+        serviceQueue.addOperation(op)
+    }
+    
     func seek(to time: TimeInterval) {
         let wasPlaying = playerState == .playing
         if wasPlaying {
