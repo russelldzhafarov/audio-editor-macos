@@ -6,7 +6,6 @@
 //
 
 import AVFoundation
-import Accelerate
 
 class ReadAudioOperation: ResultOperation<AudioFile> {
     
@@ -39,10 +38,7 @@ class ReadAudioOperation: ResultOperation<AudioFile> {
             
             try file.read(into: buffer)
             
-            var amps = Array(UnsafeBufferPointer(start: buffer.floatChannelData?[0], count:Int(buffer.frameLength)))
-            
-            amps = compress(amps, compression: Int(asset.duration.seconds * 10))
-            let compressedSampleRate = Double(amps.count) / asset.duration.seconds
+            let downsampled = AudioService.compress(buffer: buffer)
             
             result = .success(
                 AudioFile(fileFormat: fileUrl.pathExtension,
@@ -50,8 +46,8 @@ class ReadAudioOperation: ResultOperation<AudioFile> {
                           sampleRate: file.fileFormat.sampleRate,
                           channelCount: Int(file.fileFormat.channelCount),
                           pcmBuffer: buffer,
-                          compressedData: AudioSampleData(sampleRate: compressedSampleRate,
-                                                          amps: amps))
+                          compressedData: AudioSampleData(sampleRate: downsampled.sampleRate,
+                                                          amps: downsampled.data))
             )
             
         } catch {
@@ -59,38 +55,5 @@ class ReadAudioOperation: ResultOperation<AudioFile> {
         }
         
         print("ReadAudioOperation took: \(CACurrentMediaTime() - time) sec")
-    }
-    
-    func compress(_ inputSignal: [Float], compression: Int) -> [Float] {
-        let time = CACurrentMediaTime()
-        
-        var processingBuffer = [Float](repeating: 0.0,
-                                       count: Int(inputSignal.count))
-        
-        // Take the absolute values to get amplitude
-        vDSP_vabs(inputSignal,                      // Single-precision real input vector.
-                  1,                                // Stride size for A.
-                  &processingBuffer,                // Single-precision real output vector.
-                  1,                                // Address stride for C.
-                  vDSP_Length(inputSignal.count))   // The number of elements to process.
-        
-        let filter = [Float](repeating: 1.0 / Float(compression),
-                             count: Int(compression))
-        
-        let downSampledLength = inputSignal.count / compression
-        
-        var downSampledData = [Float](repeating: 0.0,
-                                      count: downSampledLength)
-        
-        vDSP_desamp(processingBuffer,               // Input signal.
-                    vDSP_Stride(compression),       // Decimation Factor.
-                    filter,                         // Filter.
-                    &downSampledData,               // Output.
-                    vDSP_Length(downSampledLength), // Output length.
-                    vDSP_Length(compression))       // Filter length.
-        
-        print("CompressOperation took: \(CACurrentMediaTime() - time) sec")
-        
-        return downSampledData
     }
 }
