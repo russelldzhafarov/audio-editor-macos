@@ -19,7 +19,7 @@ class CombineBuffersOperation: ResultOperation<AVAudioPCMBuffer> {
     override func main() {
         precondition(buffers.count > 0)
         
-        let frameCapacity = buffers.reduce(0, { $1.frameLength })
+        let frameCapacity = buffers.map{ $0.frameLength }.reduce(0, +)
         if let buffer = AVAudioPCMBuffer(pcmFormat: buffers[0].format, frameCapacity: frameCapacity) {
             buffers.forEach { buffer.append($0) }
             result = .success(buffer)
