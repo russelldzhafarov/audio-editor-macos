@@ -200,6 +200,51 @@ class ViewModel: ObservableObject {
         serviceQueue.addOperation(op)
     }
     
+    func cut() {
+        stop()
+        
+        copy()
+        delete()
+    }
+    
+    func delete() {
+        stop()
+        
+        guard let selectedTimeRange = selectedTimeRange,
+              let pcmBuffer = pcmBuffer else { return }
+        
+        state = .processing
+        let op = DeleteBufferOperation(pcmBuffer: pcmBuffer, startTime: selectedTimeRange.lowerBound, endTime: selectedTimeRange.upperBound)
+        op.completionBlock = { [weak self] in
+            guard let strongSelf = self else { return }
+            
+            defer {
+                strongSelf.state = .ready
+            }
+            
+            switch op.result {
+            case .success(let (pcmBuffer, removed)):
+                strongSelf.amps = AudioService.compress(buffer: pcmBuffer)
+                strongSelf.pcmBuffer = pcmBuffer
+                strongSelf.visibleTimeRange = strongSelf.visibleTimeRange.clamped(to: 0.0 ..< pcmBuffer.duration)
+                strongSelf.selectedTimeRange = nil
+                
+                let time = selectedTimeRange.lowerBound
+                strongSelf.undoManager.registerUndo(withTarget: strongSelf) { target in
+                    target.paste(buffer: removed, at: time)
+                }
+                strongSelf.undoManager.setActionName("Delete")
+                
+            case .failure(let error):
+                strongSelf.error = error
+                
+            case .none:
+                break
+            }
+        }
+        serviceQueue.addOperation(op)
+    }
+    
     func seek(to time: TimeInterval) {
         let wasPlaying = playerState == .playing
         if wasPlaying {
