@@ -130,6 +130,10 @@ class ViewController: NSViewController {
     }
     
     // MARK: - Actions
+    override func selectAll(_ sender: Any?) {
+        guard let viewModel = viewModel else { return }
+        viewModel.selectedTimeRange = 0.0 ..< viewModel.duration
+    }
     @IBAction func actionBackwardEnd(_ sender: Any) {
         viewModel?.backwardEnd()
     }
