@@ -87,13 +87,13 @@ extension WindowController: NSToolbarItemValidation {
         case .redo:
             return window?.undoManager?.canRedo ?? false
         case .cut:
-            return (contentViewController?.representedObject as? ViewModel)?.selectedTimeRange.isEmpty == false
+            return viewModel?.selectedTimeRange != nil
         case .copy:
-            return (contentViewController?.representedObject as? ViewModel)?.selectedTimeRange.isEmpty == false
+            return viewModel?.selectedTimeRange != nil
         case .paste:
             return NSPasteboard.general.data(forType: .audio)?.isEmpty == false
         case .delete:
-            return (contentViewController?.representedObject as? ViewModel)?.selectedTimeRange.isEmpty == false
+            return viewModel?.selectedTimeRange != nil
         default:
             return false
         }

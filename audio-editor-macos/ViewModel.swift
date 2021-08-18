@@ -21,7 +21,7 @@ class ViewModel: ObservableObject {
     struct ReadAudioError: Error {
     }
     
-    @Published var selectedTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
+    @Published var selectedTimeRange: Range<TimeInterval>?
     @Published var visibleTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
     @Published var currentTime: TimeInterval = 0.0
     @Published var highlighted = false
@@ -116,19 +116,19 @@ class ViewModel: ObservableObject {
         playerState = .stopped
     }
     func forward() {
-        selectedTimeRange = 0.0 ..< 0.0
+        selectedTimeRange = nil
         seek(to: currentTime + TimeInterval(15))
     }
     func forwardEnd() {
-        selectedTimeRange = 0.0 ..< 0.0
+        selectedTimeRange = nil
         seek(to: duration)
     }
     func backward() {
-        selectedTimeRange = 0.0 ..< 0.0
+        selectedTimeRange = nil
         seek(to: currentTime - TimeInterval(15))
     }
     func backwardEnd() {
-        selectedTimeRange = 0.0 ..< 0.0
+        selectedTimeRange = nil
         seek(to: TimeInterval(0))
     }
     
