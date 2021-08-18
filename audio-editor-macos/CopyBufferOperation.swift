@@ -21,10 +21,7 @@ class CopyBufferOperation: ResultOperation<AVAudioPCMBuffer> {
     }
     
     override func main() {
-        let from = AVAudioFramePosition(startTime * buffer.format.sampleRate)
-        let to = AVAudioFramePosition(endTime * buffer.format.sampleRate)
-        
-        if let segment = buffer.segment(from: from, to: to) {
+        if let segment = AudioService.copy(buffer: buffer, timeRange: startTime..<endTime) {
             result = .success(segment)
         } else {
             result = .failure(AudioBufferError())
