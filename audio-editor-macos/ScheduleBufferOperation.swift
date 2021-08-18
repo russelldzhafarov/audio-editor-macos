@@ -15,14 +15,14 @@ struct AudioBufferError: LocalizedError {
 
 class ScheduleBufferOperation: ResultOperation<Void> {
     
-    let audioFile: AudioFile
+    let pcmBuffer: AVAudioPCMBuffer
     let audioPlayer: AVAudioPlayerNode
     let startTime: TimeInterval
     let timeRange: Range<TimeInterval>?
     let completionHandler: AVAudioNodeCompletionHandler?
     
-    init(audioFile: AudioFile, audioPlayer: AVAudioPlayerNode, startTime: TimeInterval, timeRange: Range<TimeInterval>?, completionHandler: AVAudioNodeCompletionHandler?) {
-        self.audioFile = audioFile
+    init(pcmBuffer: AVAudioPCMBuffer, audioPlayer: AVAudioPlayerNode, startTime: TimeInterval, timeRange: Range<TimeInterval>?, completionHandler: AVAudioNodeCompletionHandler?) {
+        self.pcmBuffer = pcmBuffer
         self.audioPlayer = audioPlayer
         self.startTime = startTime
         self.timeRange = timeRange
@@ -34,7 +34,7 @@ class ScheduleBufferOperation: ResultOperation<Void> {
         let time = CACurrentMediaTime()
         
         if let timeRange = timeRange {
-            guard let segment = AudioService.copy(buffer: audioFile.pcmBuffer, timeRange: timeRange) else {
+            guard let segment = AudioService.copy(buffer: pcmBuffer, timeRange: timeRange) else {
                 result = .failure(AudioBufferError())
                 return
             }
@@ -43,10 +43,10 @@ class ScheduleBufferOperation: ResultOperation<Void> {
             
         } else {
             if startTime == 0 {
-                audioPlayer.scheduleBuffer(audioFile.pcmBuffer, completionHandler: completionHandler)
+                audioPlayer.scheduleBuffer(pcmBuffer, completionHandler: completionHandler)
                 
             } else {
-                guard startTime < audioFile.duration, let segment = AudioService.copy(buffer: audioFile.pcmBuffer, timeRange: startTime..<audioFile.duration) else {
+                guard startTime < pcmBuffer.duration, let segment = AudioService.copy(buffer: pcmBuffer, timeRange: startTime..<pcmBuffer.duration) else {
                     result = .failure(AudioBufferError())
                     return
                 }
