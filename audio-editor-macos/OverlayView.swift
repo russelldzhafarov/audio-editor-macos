@@ -7,23 +7,6 @@
 
 import Cocoa
 
-extension NSColor {
-    static var cursorColor: NSColor {
-        NSColor.systemRed
-    }
-    static var selectionColor: NSColor {
-        NSColor.keyboardFocusIndicatorColor.withAlphaComponent(0.3)
-    }
-    static var highlightColor: NSColor {
-        NSColor.keyboardFocusIndicatorColor.withAlphaComponent(0.2)
-    }
-}
-extension Comparable {
-    func clamped(to limits: ClosedRange<Self>) -> Self {
-        return min(max(self, limits.lowerBound), limits.upperBound)
-    }
-}
-
 class OverlayView: NSView {
     
     // MARK: - Vars
@@ -56,8 +39,11 @@ class OverlayView: NSView {
         
         let scale = CGFloat(1) + event.magnification
         
-        let duration = viewModel.visibleTimeRange.upperBound - viewModel.visibleTimeRange.lowerBound
+        let duration = viewModel.visibleDur
         let newDuration = duration / Double(scale)
+        
+        // Limit visible duration
+        guard newDuration >= TimeInterval(3) else { return }
         
         let loc = convert(event.locationInWindow, from: nil)
         let time = viewModel.visibleTimeRange.lowerBound + (duration * Double(loc.x) / Double(bounds.width))
@@ -82,8 +68,8 @@ class OverlayView: NSView {
             
             let end = convert(nextEvent.locationInWindow, from: nil)
             
-            if start.equalTo(end) {
-                viewModel.selectedTimeRange = 0.0 ..< 0.0
+            if Int(start.x) == Int(end.x) && Int(start.y) == Int(end.y) {
+                viewModel.selectedTimeRange = nil
                 viewModel.currentTime = startTime.clamped(to: 0.0...viewModel.duration)
                 
             } else {
@@ -99,7 +85,7 @@ class OverlayView: NSView {
                     viewModel.currentTime = endTime.clamped(to: 0.0...viewModel.duration)
                     
                 } else {
-                    viewModel.selectedTimeRange = 0.0 ..< 0.0
+                    viewModel.selectedTimeRange = nil
                     viewModel.currentTime = startTime.clamped(to: 0.0...viewModel.duration)
                 }
             }
@@ -157,9 +143,9 @@ class OverlayView: NSView {
         
         let pxPerSec = bounds.width / CGFloat(endTime - startTime)
         
-        if !viewModel.selectedTimeRange.isEmpty {
+        if let selectedTimeRange = viewModel.selectedTimeRange {
             // Draw selection
-            let timeRange = viewModel.selectedTimeRange.clamped(to: viewModel.visibleTimeRange)
+            let timeRange = selectedTimeRange.clamped(to: viewModel.visibleTimeRange)
             
             guard !timeRange.isEmpty else { return }
             
