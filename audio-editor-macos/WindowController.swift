@@ -69,6 +69,7 @@ class WindowController: NSWindowController {
         viewModel?.copy()
     }
     @IBAction func paste(_ sender: Any) {
+        viewModel?.paste()
     }
     @IBAction func delete(_ sender: Any) {
     }

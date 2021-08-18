@@ -155,6 +155,51 @@ class ViewModel: ObservableObject {
         serviceQueue.addOperation(op)
     }
     
+    func paste() {
+        stop()
+        
+        guard let pcmBuffer = pcmBuffer else { return }
+        
+        let pb = NSPasteboard.general
+        guard let type = pb.availableType(from: [.audio]),
+              type == .audio,
+              let data = pb.data(forType: .audio),
+              // FIXME: set correct format, read format from pasteboard
+              let buffer = AVAudioPCMBuffer(data: data, format: pcmBuffer.format) else { return }
+        
+        let bufferDur = buffer.duration
+        state = .processing
+        let op = PasteBufferOperation(srcBuffer: buffer, to: pcmBuffer, at: currentTime)
+        op.completionBlock = { [weak self] in
+            guard let strongSelf = self else { return }
+            
+            defer {
+                strongSelf.state = .ready
+            }
+            
+            switch op.result {
+            case .success(let pcmBuffer):
+                strongSelf.amps = AudioService.compress(buffer: pcmBuffer)
+                strongSelf.pcmBuffer = pcmBuffer
+                strongSelf.selectedTimeRange = strongSelf.currentTime ..< (strongSelf.currentTime + bufferDur)
+                
+                let start = strongSelf.currentTime
+                let end = start + bufferDur
+                strongSelf.undoManager.registerUndo(withTarget: strongSelf) { target in
+                    target.delete(start: start, end: end)
+                }
+                strongSelf.undoManager.setActionName("Paste")
+            
+            case .failure(let error):
+                strongSelf.error = error
+                
+            default:
+                break
+            }
+        }
+        serviceQueue.addOperation(op)
+    }
+    
     func seek(to time: TimeInterval) {
         let wasPlaying = playerState == .playing
         if wasPlaying {
