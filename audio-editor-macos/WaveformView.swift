@@ -7,15 +7,6 @@
 
 import Cocoa
 
-extension NSColor {
-    static var waveformColor: NSColor {
-        NSColor.systemTeal
-    }
-    static var waveformBackgroundColor: NSColor {
-        NSColor(red: 30.0/255.0, green: 31.0/255.0, blue: 40.0/255.0, alpha: 1.0)
-    }
-}
-
 class WaveformView: NSView {
     
     // MARK: - Vars
