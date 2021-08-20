@@ -8,11 +8,6 @@
 import Cocoa
 import Combine
 
-extension NSImage.Name {
-    static let play = NSImage.Name("play.fill")
-    static let pause = NSImage.Name("pause.fill")
-}
-
 class ViewController: NSViewController {
     
     @IBOutlet weak var hintLabel: NSTextField!
@@ -22,7 +17,10 @@ class ViewController: NSViewController {
     @IBOutlet weak var selectionEndTimeLabel: NSTextField!
     @IBOutlet weak var selectionDurationLabel: NSTextField!
     @IBOutlet weak var statusLabel: NSTextField!
+    @IBOutlet weak var fileFormatLabel: NSTextField!
     @IBOutlet weak var playButton: NSButton!
+    @IBOutlet weak var progressView: NSView!
+    @IBOutlet weak var progressIndicator: NSProgressIndicator!
     
     @IBOutlet weak var rulerView: RulerView!
     @IBOutlet weak var overlayView: OverlayView!
@@ -90,9 +88,16 @@ class ViewController: NSViewController {
                 .sink { [weak self] newValue in
                     self?.overlayView.needsDisplay = true
                     
-                    self?.selectionStartTimeLabel.stringValue = newValue.isEmpty ? "" : newValue.lowerBound.mmssms()
-                    self?.selectionEndTimeLabel.stringValue = newValue.isEmpty ? "" : newValue.upperBound.mmssms()
-                    self?.selectionDurationLabel.stringValue = newValue.isEmpty ? "" : (newValue.upperBound - newValue.lowerBound).mmssms()
+                    if let newValue = newValue {
+                        self?.selectionStartTimeLabel.stringValue = newValue.lowerBound.mmssms()
+                        self?.selectionEndTimeLabel.stringValue = newValue.upperBound.mmssms()
+                        self?.selectionDurationLabel.stringValue = (newValue.upperBound - newValue.lowerBound).mmssms()
+                        
+                    } else {
+                        self?.selectionStartTimeLabel.stringValue = ""
+                        self?.selectionEndTimeLabel.stringValue = ""
+                        self?.selectionDurationLabel.stringValue = ""
+                    }
                 }
                 .store(in: &cancellables)
             
@@ -105,18 +110,43 @@ class ViewController: NSViewController {
                 }
                 .store(in: &cancellables)
             
-            viewModel.$loaded
+            viewModel.$state
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] newValue in
                     self?.waveformView.needsDisplay = true
                     self?.overlayView.needsDisplay = true
                     self?.rulerView.needsDisplay = true
                     
-                    self?.hintLabel.isHidden = newValue
-                    self?.hintImageView.isHidden = newValue
-                    
-                    self?.statusLabel.isHidden = !newValue
-                    self?.statusLabel.stringValue = self?.viewModel?.status ?? "--"
+                    switch newValue {
+                    case .empty:
+                        self?.progressView.isHidden = true
+                        
+                        self?.hintLabel.isHidden = false
+                        self?.hintImageView.isHidden = false
+                        
+                        self?.statusLabel.stringValue = "Drop media file to timeline or hit Cmd + O."
+                        self?.fileFormatLabel.stringValue = ""
+                        
+                    case .processing:
+                        self?.progressView.isHidden = false
+                        self?.progressIndicator.startAnimation(nil)
+                        
+                        self?.hintLabel.isHidden = true
+                        self?.hintImageView.isHidden = true
+                        
+                        self?.statusLabel.stringValue = "Processing..."
+                        self?.fileFormatLabel.stringValue = self?.viewModel?.status ?? ""
+                        
+                    case .ready:
+                        self?.progressView.isHidden = true
+                        self?.progressIndicator.stopAnimation(nil)
+                        
+                        self?.hintLabel.isHidden = true
+                        self?.hintImageView.isHidden = true
+                        
+                        self?.statusLabel.stringValue = "Ready"
+                        self?.fileFormatLabel.stringValue = self?.viewModel?.status ?? ""
+                    }
                 }
                 .store(in: &cancellables)
             
