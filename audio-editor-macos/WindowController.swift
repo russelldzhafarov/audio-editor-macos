@@ -78,7 +78,18 @@ class WindowController: NSWindowController {
 
 extension WindowController: NSMenuItemValidation {
     func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-        true
+        switch menuItem.action {
+        case #selector(cut(_:)):
+            return viewModel?.selectedTimeRange != nil
+        case #selector(copy(_:)):
+            return viewModel?.selectedTimeRange != nil
+        case #selector(paste(_:)):
+            return NSPasteboard.general.data(forType: .audio)?.isEmpty == false
+        case #selector(delete(_:)):
+            return viewModel?.selectedTimeRange != nil
+        default:
+            return true
+        }
     }
 }
 
