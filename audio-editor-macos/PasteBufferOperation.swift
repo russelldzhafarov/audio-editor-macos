@@ -36,7 +36,7 @@ class PasteBufferOperation: ResultOperation<AVAudioPCMBuffer> {
         
         // Copy first part
         if time > 0.0 {
-            guard let segment1 = AudioService.copy(buffer: dstBuffer, timeRange: 0.0..<time) else {
+            guard let segment1 = dstBuffer.copy(timeRange: 0.0..<time) else {
                 result = .failure(AudioBufferError())
                 return
             }
@@ -48,7 +48,7 @@ class PasteBufferOperation: ResultOperation<AVAudioPCMBuffer> {
         
         // Copy second part
         if time < dstBuffer.duration {
-            guard let segment2 = AudioService.copy(buffer: dstBuffer, timeRange: time..<dstBuffer.duration) else {
+            guard let segment2 = dstBuffer.copy(timeRange: time..<dstBuffer.duration) else {
                 result = .failure(AudioBufferError())
                 return
             }
