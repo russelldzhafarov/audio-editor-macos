@@ -24,25 +24,31 @@ class Document: NSDocument {
     override func makeWindowControllers() {
         // Returns the Storyboard that contains your Document window.
         let storyboard = NSStoryboard(name: .main, bundle: nil)
-        let windowController = storyboard.instantiateController(withIdentifier: .document) as! NSWindowController
+        let windowController = storyboard.instantiateController(withIdentifier: .document) as! WindowController
         self.addWindowController(windowController)
         
+        undoManager?.levelsOfUndo = 10
+        viewModel.undoManager = undoManager
+        
+        windowController.viewModel = viewModel
         windowController.contentViewController?.representedObject = viewModel
     }
-
-    override func data(ofType typeName: String) throws -> Data {
-        // Insert code here to write your document to data of the specified type, throwing an error in case of failure.
-        // Alternatively, you could remove this method and override fileWrapper(ofType:), write(to:ofType:), or write(to:ofType:for:originalContentsURL:) instead.
-        throw NSError(domain: NSOSStatusErrorDomain, code: unimpErr, userInfo: nil)
+    
+    override func write(to url: URL, ofType typeName: String) throws {
+        guard let pcmBuffer = viewModel.pcmBuffer else {
+            throw NSError(domain: NSOSStatusErrorDomain, code: unimpErr, userInfo: nil)
+        }
+        
+        let audioFile = try AVAudioFile(forWriting: url,
+                                        settings: pcmBuffer.format.settings,
+                                        commonFormat: pcmBuffer.format.commonFormat,
+                                        interleaved: pcmBuffer.format.isInterleaved)
+        
+        try audioFile.write(from: pcmBuffer)
     }
-
-    override func read(from data: Data, ofType typeName: String) throws {
-        // Insert code here to read your document from the given data of the specified type, throwing an error in case of failure.
-        // Alternatively, you could remove this method and override read(from:ofType:) instead.
-        // If you do, you should also override isEntireFileLoaded to return false if the contents are lazily loaded.
-        throw NSError(domain: NSOSStatusErrorDomain, code: unimpErr, userInfo: nil)
+    
+    override func read(from url: URL, ofType typeName: String) throws {
+        viewModel.readAudioFile(at: url)
     }
-
-
 }
 
