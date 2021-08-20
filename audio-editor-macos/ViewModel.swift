@@ -18,15 +18,18 @@ class ViewModel: ObservableObject {
     enum PlayerState {
         case playing, stopped, paused
     }
-    struct ReadAudioError: Error {
+    enum State {
+        case empty, processing, ready
+    }
+    enum EditError: Error {
+        case delete, copy, paste
     }
     
     @Published var selectedTimeRange: Range<TimeInterval>?
     @Published var visibleTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
     @Published var currentTime: TimeInterval = 0.0
     @Published var highlighted = false
-    @Published var loaded = false
-    var looped = true
+    @Published var state: State = .empty
     
     var duration: TimeInterval {
         pcmBuffer?.duration ?? TimeInterval(0)
@@ -71,6 +74,7 @@ class ViewModel: ObservableObject {
                     
                     strongSelf.currentTime = seekTime + (Double(strongSelf.currentFrame) / pcmBuffer.sampleRate)
                 }
+                timer?.fire()
                 
             case .paused, .stopped:
                 timer?.invalidate()
@@ -78,6 +82,8 @@ class ViewModel: ObservableObject {
             }
         }
     }
+    
+    var undoManager: UndoManager?
     
     deinit {
         timer?.invalidate()
@@ -90,37 +96,38 @@ class ViewModel: ObservableObject {
     }
     
     // MARK: - Undo / Redo Operations
-    @objc func delete(start: TimeInterval, end: TimeInterval) {
+    func delete(start: TimeInterval, end: TimeInterval) {
         guard let edited = pcmBuffer?.remove(startTime: start, endTime: end),
               let removed = pcmBuffer?.copy(timeRange: start..<end) else {
             self.error = EditError.delete
             return
         }
         
-        undoManager.registerUndo(withTarget: self) { target in
+        undoManager?.registerUndo(withTarget: self) { target in
             target.paste(buffer: removed, at: start)
         }
-        undoManager.setActionName("Delete")
+        undoManager?.setActionName("Delete")
         
         pcmBuffer = edited
-        amps = AudioService.compress(buffer: edited)
+        amps = edited.compressed()
         state = .ready
         selectedTimeRange = nil
+        visibleTimeRange = visibleTimeRange.clamped(to: 0..<edited.duration)
     }
     
-    @objc func paste(buffer: AVAudioPCMBuffer, at time: TimeInterval) {
+    func paste(buffer: AVAudioPCMBuffer, at time: TimeInterval) {
         guard let edited = pcmBuffer?.paste(buffer: buffer, at: time) else {
-            self.error = EditError.delete
+            self.error = EditError.paste
             return
         }
         
-        undoManager.registerUndo(withTarget: self) { target in
+        undoManager?.registerUndo(withTarget: self) { target in
             target.delete(start: time, end: time + buffer.duration)
         }
-        undoManager.setActionName("Paste")
+        undoManager?.setActionName("Paste")
         
         pcmBuffer = edited
-        amps = AudioService.compress(buffer: edited)
+        amps = edited.compressed()
         state = .ready
         selectedTimeRange = time ..< (time + Double(buffer.frameLength) / buffer.sampleRate)
     }
@@ -130,119 +137,73 @@ class ViewModel: ObservableObject {
               let pcmBuffer = pcmBuffer else { return }
         
         state = .processing
-        let op = CopyBufferOperation(buffer: pcmBuffer, startTime: selectedTimeRange.lowerBound, endTime: selectedTimeRange.upperBound)
-        op.completionBlock = { [weak self] in
-            
+        serviceQueue.addOperation {
             defer {
-                self?.state = .ready
+                self.state = .ready
+            }
+            guard let buffer = pcmBuffer.copy(timeRange: selectedTimeRange) else {
+                self.error = EditError.copy
+                return
             }
             
-            switch op.result {
-            case .success(let buffer):
+            do {
+                let obj = AudioData(format: buffer.format, data: NSData(buffer: buffer))
+                
+                let codedData = try NSKeyedArchiver.archivedData(withRootObject: obj, requiringSecureCoding: true)
+                
                 let pb = NSPasteboard.general
                 pb.clearContents()
                 pb.declareTypes([.audio], owner: nil)
-                let data = Data(buffer: buffer)
-                pb.setData(data, forType: .audio)
+                pb.setData(codedData, forType: .audio)
                 
-            case .failure(let error):
-                self?.error = error
-                
-            case .none:
-                break
+            } catch {
+                self.error = error
             }
         }
-        serviceQueue.addOperation(op)
     }
     
     func paste() {
-        stop()
-        
-        guard let pcmBuffer = pcmBuffer else { return }
-        
         let pb = NSPasteboard.general
+        
         guard let type = pb.availableType(from: [.audio]),
               type == .audio,
-              let data = pb.data(forType: .audio),
-              // FIXME: set correct format, read format from pasteboard
-              let buffer = AVAudioPCMBuffer(data: data, format: pcmBuffer.format) else { return }
+              let data = pb.data(forType: .audio) else { return }
         
-        let bufferDur = buffer.duration
-        state = .processing
-        let op = PasteBufferOperation(srcBuffer: buffer, to: pcmBuffer, at: currentTime)
-        op.completionBlock = { [weak self] in
-            guard let strongSelf = self else { return }
-            
-            defer {
-                strongSelf.state = .ready
+        do {
+            guard let obj = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? AudioData else {
+                throw EditError.paste
             }
             
-            switch op.result {
-            case .success(let pcmBuffer):
-                strongSelf.amps = AudioService.compress(buffer: pcmBuffer)
-                strongSelf.pcmBuffer = pcmBuffer
-                strongSelf.selectedTimeRange = strongSelf.currentTime ..< (strongSelf.currentTime + bufferDur)
-                
-                let start = strongSelf.currentTime
-                let end = start + bufferDur
-                strongSelf.undoManager.registerUndo(withTarget: strongSelf) { target in
-                    target.delete(start: start, end: end)
-                }
-                strongSelf.undoManager.setActionName("Paste")
-            
-            case .failure(let error):
-                strongSelf.error = error
-                
-            default:
-                break
+            guard let buffer = AVAudioPCMBuffer(data: obj.data as Data, format: obj.format) else {
+                throw EditError.paste
             }
+            
+            stop()
+            state = .processing
+            serviceQueue.addOperation {
+                self.paste(buffer: buffer, at: self.currentTime)
+                self.state = .ready
+            }
+            
+        } catch {
+            self.error = error
+            return
         }
-        serviceQueue.addOperation(op)
     }
     
     func cut() {
-        stop()
-        
         copy()
         delete()
     }
     
     func delete() {
+        guard let selectedTimeRange = selectedTimeRange else { return }
         stop()
-        
-        guard let selectedTimeRange = selectedTimeRange,
-              let pcmBuffer = pcmBuffer else { return }
-        
         state = .processing
-        let op = DeleteBufferOperation(pcmBuffer: pcmBuffer, startTime: selectedTimeRange.lowerBound, endTime: selectedTimeRange.upperBound)
-        op.completionBlock = { [weak self] in
-            guard let strongSelf = self else { return }
-            
-            defer {
-                strongSelf.state = .ready
-            }
-            
-            switch op.result {
-            case .success(let (pcmBuffer, removed)):
-                strongSelf.amps = AudioService.compress(buffer: pcmBuffer)
-                strongSelf.pcmBuffer = pcmBuffer
-                strongSelf.visibleTimeRange = strongSelf.visibleTimeRange.clamped(to: 0.0 ..< pcmBuffer.duration)
-                strongSelf.selectedTimeRange = nil
-                
-                let time = selectedTimeRange.lowerBound
-                strongSelf.undoManager.registerUndo(withTarget: strongSelf) { target in
-                    target.paste(buffer: removed, at: time)
-                }
-                strongSelf.undoManager.setActionName("Delete")
-                
-            case .failure(let error):
-                strongSelf.error = error
-                
-            case .none:
-                break
-            }
+        serviceQueue.addOperation {
+            self.delete(start: selectedTimeRange.lowerBound, end: selectedTimeRange.upperBound)
+            self.state = .ready
         }
-        serviceQueue.addOperation(op)
     }
     
     func seek(to time: TimeInterval) {
@@ -319,27 +280,65 @@ class ViewModel: ObservableObject {
         }
     }
     
-    func readAudioFile(at url: URL) {
-        state = .processing
+    func play(buffer: AVAudioPCMBuffer) {
+        audioEngine.attach(audioPlayer)
+        audioEngine.connect(audioPlayer,
+                            to: audioEngine.outputNode,
+                            format: nil)
         
-        let op = ReadBufferOperation(fileUrl: url)
-        op.completionBlock = {
-            self.state = .ready
+        let completionHandler: AVAudioNodeCompletionHandler = { [weak self] in
+            self?.playerState = .stopped
+        }
+        
+        if let selectedTimeRange = selectedTimeRange {
+            guard let segment = buffer.copy(timeRange: selectedTimeRange) else {
+                self.error = EditError.copy
+                return
+            }
             
-            switch op.result {
-            case .success(let pcmBuffer):
-                self.amps = AudioService.compress(buffer: pcmBuffer)
-                self.pcmBuffer = pcmBuffer
-                self.visibleTimeRange = 0.0 ..< pcmBuffer.duration
+            audioPlayer.scheduleBuffer(segment, completionHandler: completionHandler)
+            
+        } else {
+            if currentTime == .zero {
+                audioPlayer.scheduleBuffer(buffer, completionHandler: completionHandler)
                 
-            case .failure(let error):
+            } else {
+                guard currentTime < buffer.duration,
+                      let segment = buffer.copy(timeRange: currentTime..<buffer.duration)
+                else {
+                    self.error = EditError.copy
+                    return
+                }
                 
-                self.error = error
-                
-            case .none:
-                break
+                audioPlayer.scheduleBuffer(segment, completionHandler: completionHandler)
             }
         }
-        serviceQueue.addOperation(op)
+        
+        do {
+            try audioEngine.start()
+            audioPlayer.play()
+            
+            playerState = .playing
+            
+        } catch {
+            self.error = error
+        }
+    }
+    
+    func readAudioFile(at url: URL) {
+        state = .processing
+        serviceQueue.addOperation {
+            defer {
+                self.state = .ready
+            }
+            do {
+                self.pcmBuffer = try AVAudioPCMBuffer(url: url)
+                self.amps = self.pcmBuffer!.compressed()
+                self.visibleTimeRange = 0.0 ..< self.pcmBuffer!.duration
+                
+            } catch {
+                self.error = error
+            }
+        }
     }
 }
