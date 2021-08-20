@@ -10,6 +10,8 @@ import AVFoundation
 
 class WindowController: NSWindowController {
 
+    var viewModel: ViewModel?
+    
     override func windowDidLoad() {
         super.windowDidLoad()
         let toolbar = NSToolbar(identifier: .toolbarIdentifier)
@@ -31,12 +33,13 @@ class WindowController: NSWindowController {
     
     // MARK: - Toolbar Item Custom Actions
     @IBAction func undo(_ sender: Any) {
-        undoManager?.undo()
+        viewModel?.undoManager?.undo()
     }
     @IBAction func redo(_ sender: Any) {
-        undoManager?.redo()
+        viewModel?.undoManager?.redo()
     }
     @IBAction func cut(_ sender: Any) {
+        viewModel?.cut()
     }
     @IBAction func copy(_ sender: Any) {
         viewModel?.copy()
@@ -70,9 +73,9 @@ extension WindowController: NSToolbarItemValidation {
     func validateToolbarItem(_ item: NSToolbarItem) -> Bool {
         switch item.itemIdentifier {
         case .undo:
-            return window?.undoManager?.canUndo ?? false
+            return viewModel?.undoManager?.canUndo == true
         case .redo:
-            return window?.undoManager?.canRedo ?? false
+            return viewModel?.undoManager?.canRedo == true
         case .cut:
             return viewModel?.selectedTimeRange != nil
         case .copy:
