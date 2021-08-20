@@ -87,7 +87,7 @@ class RulerView: NSView {
             
             if drawLabel {
                 NSString(string: stepInSec < 1 ? time.mmssms() : time.mmss())
-                    .draw(at: NSPoint(x: x, y: .zero),
+                    .draw(at: NSPoint(x: x + CGFloat(2), y: .zero),
                           withAttributes: attributes)
             }
             
