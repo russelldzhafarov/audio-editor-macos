@@ -34,7 +34,7 @@ class ScheduleBufferOperation: ResultOperation<Void> {
         let time = CACurrentMediaTime()
         
         if let timeRange = timeRange {
-            guard let segment = AudioService.copy(buffer: pcmBuffer, timeRange: timeRange) else {
+            guard let segment = pcmBuffer.copy(timeRange: timeRange) else {
                 result = .failure(AudioBufferError())
                 return
             }
@@ -46,7 +46,7 @@ class ScheduleBufferOperation: ResultOperation<Void> {
                 audioPlayer.scheduleBuffer(pcmBuffer, completionHandler: completionHandler)
                 
             } else {
-                guard startTime < pcmBuffer.duration, let segment = AudioService.copy(buffer: pcmBuffer, timeRange: startTime..<pcmBuffer.duration) else {
+                guard startTime < pcmBuffer.duration, let segment = pcmBuffer.copy(timeRange: startTime..<pcmBuffer.duration) else {
                     result = .failure(AudioBufferError())
                     return
                 }
