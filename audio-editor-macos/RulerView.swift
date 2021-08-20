@@ -7,46 +7,6 @@
 
 import Cocoa
 
-extension TimeInterval {
-    func mmss() -> String {
-        let m: Int = Int(self) / 60
-        let s: Int = Int(self) % 60
-        return String(format: "%0d:%02d", m, s)
-    }
-    func mmssms() -> String {
-        let m: Int = Int(self) / 60
-        let s: Int = Int(self) % 60
-        let ms: Int = Int((truncatingRemainder(dividingBy: 1)) * 1000)
-        return String(format: "%0d:%02d,%02d", m, s, ms/10)
-    }
-    func hhmmssms() -> String {
-        let h: Int = Int(self / 3600)
-        let m: Int = Int(self) / 60
-        let s: Int = Int(self) % 60
-        let ms: Int = Int((truncatingRemainder(dividingBy: 1)) * 1000)
-        return String(format: "%02d:%02d:%02d.%02d", h, m, s, ms)
-    }
-}
-extension Double {
-    func floor(nearest: Double) -> Double {
-        let intDiv = Double(Int(self / nearest))
-        return intDiv * nearest
-    }
-    func round(nearest: Double) -> Double {
-        let n = 1/nearest
-        let numberToRound = self * n
-        return numberToRound.rounded() / n
-    }
-}
-extension NSColor {
-    static var rulerColor: NSColor {
-        NSColor(red: 83.0/255.0, green: 89.0/255.0, blue: 105.0/255.0, alpha: 1.0)
-    }
-    static var rulerLabelColor: NSColor {
-        NSColor(red: 142.0/255.0, green: 150.0/255.0, blue: 171.0/255.0, alpha: 1.0)
-    }
-}
-
 class RulerView: NSView {
     
     // MARK: - Vars

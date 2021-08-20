@@ -6,34 +6,7 @@
 //
 
 import Cocoa
-
-fileprivate extension NSToolbar.Identifier {
-    static let toolbarIdentifier = NSToolbar.Identifier("MainWindowToolbarIdentifier")
-}
-fileprivate extension NSToolbarItem.Identifier {
-    static let undo = NSToolbarItem.Identifier(rawValue: "undoToolbarItemIdentifier")
-    static let redo = NSToolbarItem.Identifier(rawValue: "redoToolbarItemIdentifier")
-    static let cut = NSToolbarItem.Identifier(rawValue: "cutToolbarItemIdentifier")
-    static let copy = NSToolbarItem.Identifier(rawValue: "copyToolbarItemIdentifier")
-    static let paste = NSToolbarItem.Identifier(rawValue: "pasteToolbarItemIdentifier")
-    static let delete = NSToolbarItem.Identifier(rawValue: "deleteToolbarItemIdentifier")
-}
-fileprivate extension NSColor {
-    static var windowBackgroundColor: NSColor {
-        NSColor(red: 39.0/255.0, green: 42.0/255.0, blue: 54.0/255.0, alpha: 1.0)
-    }
-}
-fileprivate extension NSImage.Name {
-    static let undo = NSImage.Name("arrow.uturn.backward")
-    static let redo = NSImage.Name("arrow.uturn.forward")
-    static let cut = NSImage.Name("scissors")
-    static let copy = NSImage.Name("doc.on.clipboard")
-    static let paste = NSImage.Name("doc.on.doc")
-    static let delete = NSImage.Name("trash")
-}
-fileprivate extension NSPasteboard.PasteboardType {
-    static let audio = NSPasteboard.PasteboardType("com.russelldzhafarov.audio-editor-macos.audio.pbtype")
-}
+import AVFoundation
 
 class WindowController: NSWindowController {
 

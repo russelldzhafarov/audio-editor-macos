@@ -6,13 +6,7 @@
 //
 
 import Cocoa
-
-fileprivate extension NSStoryboard.Name {
-    static let main = NSStoryboard.Name("Main")
-}
-fileprivate extension NSStoryboard.SceneIdentifier {
-    static let document = NSStoryboard.SceneIdentifier("Document Window Controller")
-}
+import AVFoundation
 
 class Document: NSDocument {
 
