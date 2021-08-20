@@ -9,19 +9,37 @@ import AVFoundation
 import Accelerate
 
 extension AVAudioPCMBuffer {
+    func floatArray() -> [[Float]]? {
+        guard let floatChannelData = self.floatChannelData else { return nil }
+        
+        let channelCount = Int(self.format.channelCount)
+        let frameLength = Int(self.frameLength)
+        let stride = self.stride
+        
+        var result: [[Float]] = Array(repeating: Array(repeating: 0.0, count: frameLength), count: channelCount)
+        for channel in 0..<channelCount {
+            for sampleIndex in 0..<frameLength {
+                result[channel][sampleIndex] = floatChannelData[channel][sampleIndex * stride]
+            }
+        }
+        return result
+    }
+}
+
+extension AVAudioPCMBuffer {
     // Read the contents of the url into this buffer
     convenience init?(url: URL) throws {
         guard let file = try? AVAudioFile(forReading: url) else { return nil }
         try self.init(file: file)
     }
-
+    
     // Read entire file and return a new AVAudioPCMBuffer with its contents
     convenience init?(file: AVAudioFile) throws {
         file.framePosition = 0
-
+        
         self.init(pcmFormat: file.processingFormat,
                   frameCapacity: AVAudioFrameCount(file.length))
-
+        
         try file.read(into: self)
     }
 }
@@ -96,6 +114,7 @@ extension AVAudioPCMBuffer {
     }
     
     func paste(buffer: AVAudioPCMBuffer, at time: TimeInterval) -> AVAudioPCMBuffer? {
+        
         var buffers = [AVAudioPCMBuffer]()
         
         // Copy first part
