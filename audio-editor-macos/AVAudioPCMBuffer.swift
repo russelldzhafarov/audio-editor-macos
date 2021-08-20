@@ -6,6 +6,25 @@
 //
 
 import AVFoundation
+import Accelerate
+
+extension AVAudioPCMBuffer {
+    // Read the contents of the url into this buffer
+    convenience init?(url: URL) throws {
+        guard let file = try? AVAudioFile(forReading: url) else { return nil }
+        try self.init(file: file)
+    }
+
+    // Read entire file and return a new AVAudioPCMBuffer with its contents
+    convenience init?(file: AVAudioFile) throws {
+        file.framePosition = 0
+
+        self.init(pcmFormat: file.processingFormat,
+                  frameCapacity: AVAudioFrameCount(file.length))
+
+        try file.read(into: self)
+    }
+}
 
 extension AVAudioPCMBuffer {
     
@@ -81,7 +100,7 @@ extension AVAudioPCMBuffer {
         
         // Copy first part
         if time > 0.0 {
-            guard let segment1 = AudioService.copy(buffer: self, timeRange: 0.0..<time) else {
+            guard let segment1 = self.copy(timeRange: 0.0..<time) else {
                 return nil
             }
             
@@ -92,7 +111,7 @@ extension AVAudioPCMBuffer {
         
         // Copy second part
         if time < self.duration {
-            guard let segment2 = AudioService.copy(buffer: self, timeRange: time..<self.duration) else {
+            guard let segment2 = self.copy(timeRange: time..<self.duration) else {
                 return nil
             }
             
@@ -146,5 +165,36 @@ extension AVAudioPCMBuffer {
         buffers.forEach { resBuffer.append($0) }
         
         return resBuffer
+    }
+    
+    func copy(timeRange: Range<TimeInterval>) -> AVAudioPCMBuffer? {
+        guard timeRange.upperBound > timeRange.lowerBound else { return nil }
+        
+        let from = AVAudioFramePosition(max(1,
+                                            timeRange.lowerBound * self.format.sampleRate))
+        
+        let to = AVAudioFramePosition(min(Double(self.frameLength),
+                                          timeRange.upperBound * self.format.sampleRate))
+        
+        return self.segment(from: from, to: to)
+    }
+    
+    func compressed(_ compression: Int = 1000) -> [Float] {
+        
+        let inputSignal = Array(UnsafeBufferPointer(start: self.floatChannelData?[0], count:Int(self.frameLength)))
+        
+        var processingBuffer = [Float](repeating: 0.0, count: Int(inputSignal.count))
+        
+        vDSP_vabs(inputSignal, 1, &processingBuffer, 1, vDSP_Length(inputSignal.count))
+        
+        let filter = [Float](repeating: 1.0 / Float(compression), count: Int(compression))
+        
+        let downSampledLength = inputSignal.count / compression
+        
+        var downSampledData = [Float](repeating: 0.0, count: downSampledLength)
+        
+        vDSP_desamp(processingBuffer, vDSP_Stride(compression), filter, &downSampledData, vDSP_Length(downSampledLength), vDSP_Length(compression))
+        
+        return downSampledData
     }
 }
