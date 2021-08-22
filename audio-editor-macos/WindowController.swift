@@ -32,12 +32,24 @@ class WindowController: NSWindowController {
     }
     
     // MARK: - Toolbar Item Custom Actions
-    @IBAction func undo(_ sender: Any) { viewModel?.undoManager?.undo() }
-    @IBAction func redo(_ sender: Any) { viewModel?.undoManager?.redo() }
-    @IBAction func cut(_ sender: Any) { viewModel?.cut() }
-    @IBAction func copy(_ sender: Any) { viewModel?.copy() }
-    @IBAction func paste(_ sender: Any) { viewModel?.paste() }
-    @IBAction func delete(_ sender: Any) { viewModel?.delete() }
+    @IBAction func undo(_ sender: Any) {
+        viewModel?.undoManager?.undo()
+    }
+    @IBAction func redo(_ sender: Any) {
+        viewModel?.undoManager?.redo()
+    }
+    @IBAction func cut(_ sender: Any) {
+        viewModel?.cut()
+    }
+    @IBAction func copy(_ sender: Any) {
+        viewModel?.copy()
+    }
+    @IBAction func paste(_ sender: Any) {
+        viewModel?.paste()
+    }
+    @IBAction func delete(_ sender: Any) {
+        viewModel?.delete()
+    }
 }
 
 extension WindowController: NSMenuItemValidation {
@@ -48,7 +60,7 @@ extension WindowController: NSMenuItemValidation {
         case #selector(copy(_:)):
             return viewModel?.selectedTimeRange != nil
         case #selector(paste(_:)):
-            return NSPasteboard.general.data(forType: AVAudioPCMBuffer.pbType)?.isEmpty == false
+            return NSPasteboard.general.data(forType: .audio)?.isEmpty == false
         case #selector(delete(_:)):
             return viewModel?.selectedTimeRange != nil
         default:
@@ -69,7 +81,7 @@ extension WindowController: NSToolbarItemValidation {
         case .copy:
             return viewModel?.selectedTimeRange != nil
         case .paste:
-            return NSPasteboard.general.data(forType: AVAudioPCMBuffer.pbType)?.isEmpty == false
+            return NSPasteboard.general.data(forType: .audio)?.isEmpty == false
         case .delete:
             return viewModel?.selectedTimeRange != nil
         default:
@@ -80,10 +92,28 @@ extension WindowController: NSToolbarItemValidation {
 
 extension WindowController: NSToolbarDelegate {
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [.undo, .redo, .space, .cut, .copy, .paste, .delete, .flexibleSpace]
+        return [
+            .undo,
+            .redo,
+            .space,
+            .cut,
+            .copy,
+            .paste,
+            .delete,
+            .flexibleSpace
+        ]
     }
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [.undo, .redo, .cut, .copy, .paste, .delete, .space, .flexibleSpace]
+        return [
+            .undo,
+            .redo,
+            .cut,
+            .copy,
+            .paste,
+            .delete,
+            .space,
+            .flexibleSpace
+        ]
     }
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
         

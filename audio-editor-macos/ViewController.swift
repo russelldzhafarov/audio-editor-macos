@@ -60,11 +60,13 @@ class ViewController: NSViewController {
                 }
                 .store(in: &cancellables)
             
-            viewModel.player.$state
+            viewModel.$playerState
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] newValue in
                     switch newValue {
                     case .stopped:
+                        self?.playButton.image = NSImage(systemSymbolName: .play, accessibilityDescription: "")
+                    case .paused:
                         self?.playButton.image = NSImage(systemSymbolName: .play, accessibilityDescription: "")
                     case .playing:
                         self?.playButton.image = NSImage(systemSymbolName: .pause, accessibilityDescription: "")
@@ -72,7 +74,7 @@ class ViewController: NSViewController {
                 }
                 .store(in: &cancellables)
             
-            viewModel.player.$currentTime
+            viewModel.$currentTime
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] newValue in
                     self?.overlayView.needsDisplay = true
