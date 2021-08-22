@@ -7,6 +7,7 @@
 
 import Cocoa
 import AVFoundation
+import Accelerate
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -14,9 +15,45 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.appearance = NSAppearance(named: .darkAqua)
     }
     func applicationWillTerminate(_ notification: Notification) {
-        if NSPasteboard.general.data(forType: .audio)?.isEmpty == false {
+        if NSPasteboard.general.data(forType: AVAudioPCMBuffer.pbType)?.isEmpty == false {
             NSPasteboard.general.clearContents()
         }
+    }
+}
+
+public extension Array where Element == Float {
+    /// Takes an array of floating point values and down samples it to have a lesser number of samples
+    /// Returns an array of downsampled floating point values
+    ///
+    /// Parameters:
+    ///   - sampleCount: the number of samples we will downsample the array to
+    func downSample(to sampleCount: Int = 128) -> [Element] {
+        let inputSampleCount = self.count
+        let inputLength = vDSP_Length(inputSampleCount)
+
+        let filterLength: vDSP_Length = 2
+        let filter = [Float](repeating: 1 / Float(filterLength), count: Int(filterLength))
+
+        let decimationFactor = inputSampleCount / sampleCount
+        let outputLength = vDSP_Length((inputLength - filterLength) / vDSP_Length(decimationFactor))
+
+        var outputFloats = [Float](repeating: 0, count: Int(outputLength))
+        vDSP_desamp(self,
+                    decimationFactor,
+                    filter,
+                    &outputFloats,
+                    outputLength,
+                    filterLength)
+        
+        return outputFloats
+    }
+}
+
+extension RangeReplaceableCollection where Iterator.Element: ExpressibleByIntegerLiteral {
+    /// Initialize array with zeros, ~10x faster than append for array of size 4096
+    /// - parameter count: Number of elements in the array
+    public init(zeros count: Int) {
+        self.init(repeating: 0, count: count)
     }
 }
 
@@ -141,8 +178,4 @@ extension NSStoryboard.Name {
 
 extension NSStoryboard.SceneIdentifier {
     static let document = NSStoryboard.SceneIdentifier("Document Window Controller")
-}
-
-extension NSPasteboard.PasteboardType {
-    static let audio = NSPasteboard.PasteboardType("com.russelldzhafarov.audio-editor-macos.audio.pbtype")
 }
