@@ -19,7 +19,6 @@ class RulerView: NSView {
     
     // MARK: - Overrides
     override var isFlipped: Bool { true }
-    override var acceptsFirstResponder: Bool { true }
     override var mouseDownCanMoveWindow: Bool { false }
     
     // MARK: - Drawing
@@ -29,12 +28,6 @@ class RulerView: NSView {
         // Drawing code here.
         guard let viewModel = viewModel,
               let ctx = NSGraphicsContext.current?.cgContext else { return }
-        
-        guard !viewModel.visibleTimeRange.isEmpty else {
-            ctx.setFillColor(NSColor.waveformBackgroundColor.cgColor)
-            ctx.fill(bounds)
-            return
-        }
         
         let startTime = viewModel.visibleTimeRange.lowerBound
         

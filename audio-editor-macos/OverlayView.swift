@@ -42,9 +42,6 @@ class OverlayView: NSView {
         let duration = viewModel.visibleDur
         let newDuration = duration / Double(scale)
         
-        // Limit visible duration
-        guard newDuration >= TimeInterval(3) else { return }
-        
         let loc = convert(event.locationInWindow, from: nil)
         let time = viewModel.visibleTimeRange.lowerBound + (duration * Double(loc.x) / Double(bounds.width))
         
@@ -70,7 +67,7 @@ class OverlayView: NSView {
             
             if Int(start.x) == Int(end.x) && Int(start.y) == Int(end.y) {
                 viewModel.selectedTimeRange = nil
-                viewModel.currentTime = startTime.clamped(to: 0.0...viewModel.duration)
+                viewModel.player.currentTime = startTime.clamped(to: 0.0...viewModel.duration)
                 
             } else {
                 
@@ -78,20 +75,20 @@ class OverlayView: NSView {
                 
                 if startTime < endTime {
                     viewModel.selectedTimeRange = (startTime ..< endTime).clamped(to: 0 ..< viewModel.duration)
-                    viewModel.currentTime = startTime.clamped(to: 0.0...viewModel.duration)
+                    viewModel.player.currentTime = startTime.clamped(to: 0.0...viewModel.duration)
                     
                 } else if startTime > endTime {
                     viewModel.selectedTimeRange = (endTime ..< startTime).clamped(to: 0 ..< viewModel.duration)
-                    viewModel.currentTime = endTime.clamped(to: 0.0...viewModel.duration)
+                    viewModel.player.currentTime = endTime.clamped(to: 0.0...viewModel.duration)
                     
                 } else {
                     viewModel.selectedTimeRange = nil
-                    viewModel.currentTime = startTime.clamped(to: 0.0...viewModel.duration)
+                    viewModel.player.currentTime = startTime.clamped(to: 0.0...viewModel.duration)
                 }
             }
             
             if nextEvent.type == .leftMouseUp {
-                viewModel.seek(to: viewModel.currentTime)
+                viewModel.seek(to: viewModel.player.currentTime)
                 break
             }
         }
@@ -103,8 +100,8 @@ class OverlayView: NSView {
         registerForDraggedTypes([.fileURL])
     }
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        let pboard = sender.draggingPasteboard
-        guard pboard.types?.contains(.fileURL) == true else { return NSDragOperation() }
+        guard sender.draggingPasteboard.canReadObject(forClasses: [NSURL.self],
+                                                      options: [.urlReadingContentsConformToTypes: viewModel?.acceptableUTITypes ?? []]) else { return NSDragOperation() }
         
         viewModel?.highlighted = true
         
@@ -135,7 +132,10 @@ class OverlayView: NSView {
         // Draw highlighting
         if viewModel.highlighted {
             ctx.setFillColor(NSColor.highlightColor.cgColor)
-            ctx.fill(bounds)
+            ctx.fill(NSRect(x: dirtyRect.origin.x,
+                            y: dirtyRect.origin.y + CGFloat(30),
+                            width: dirtyRect.width,
+                            height: dirtyRect.height - CGFloat(30)))
         }
         
         let startTime = viewModel.visibleTimeRange.lowerBound
@@ -177,9 +177,9 @@ class OverlayView: NSView {
                             height: bounds.height))
         }
         
-        if (startTime ..< endTime).contains(viewModel.currentTime) {
+        if (startTime ..< endTime).contains(viewModel.player.currentTime) {
             // Draw cursor
-            let cursorPos = CGFloat(viewModel.currentTime - viewModel.visibleTimeRange.lowerBound) * pxPerSec
+            let cursorPos = CGFloat(viewModel.player.currentTime - viewModel.visibleTimeRange.lowerBound) * pxPerSec
             
             ctx.move(to: CGPoint(x: cursorPos,
                                  y: CGFloat(22)))
