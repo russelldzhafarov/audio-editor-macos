@@ -346,7 +346,7 @@
                                         <rect key="frame" x="271" y="21" width="138" height="28"/>
                                         <textFieldCell key="cell" lineBreakMode="clipping" title="0:00:00.000" id="nKi-cA-Paa">
                                             <font key="font" metaFont="system" size="24"/>
-                                            <color key="textColor" name="labelColor"/>
+                                            <color key="textColor" red="0.70762793192408235" green="0.75293900953615944" blue="0.88845582310312698" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </textFieldCell>
                                     </textField>

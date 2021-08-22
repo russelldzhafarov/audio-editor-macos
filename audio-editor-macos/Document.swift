@@ -39,12 +39,7 @@ class Document: NSDocument {
             throw NSError(domain: NSOSStatusErrorDomain, code: unimpErr, userInfo: nil)
         }
         
-        let audioFile = try AVAudioFile(forWriting: url,
-                                        settings: pcmBuffer.format.settings,
-                                        commonFormat: pcmBuffer.format.commonFormat,
-                                        interleaved: pcmBuffer.format.isInterleaved)
-        
-        try audioFile.write(from: pcmBuffer)
+        try AVAudioFile(url: url, fromBuffer: pcmBuffer)
     }
     
     override func read(from url: URL, ofType typeName: String) throws {
