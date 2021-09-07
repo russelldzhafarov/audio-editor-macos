@@ -1,6 +1,6 @@
 //
 //  Document.swift
-//  audio-editor-macos
+//  Audio Editor
 //
 //  Created by russell.dzhafarov@gmail.com on 09.08.2021.
 //
@@ -10,12 +10,7 @@ import AVFoundation
 
 class Document: NSDocument {
 
-    let viewModel = ViewModel()
-    
-    override init() {
-        super.init()
-        // Add your subclass-specific initialization here.
-    }
+    let viewModel = EditorViewModel()
 
     override class var autosavesInPlace: Bool {
         return true
@@ -24,7 +19,7 @@ class Document: NSDocument {
     override func makeWindowControllers() {
         // Returns the Storyboard that contains your Document window.
         let storyboard = NSStoryboard(name: .main, bundle: nil)
-        let windowController = storyboard.instantiateController(withIdentifier: .document) as! WindowController
+        let windowController = storyboard.instantiateController(withIdentifier: .document) as! EditorWindowController
         self.addWindowController(windowController)
         
         undoManager?.levelsOfUndo = 10
@@ -34,16 +29,23 @@ class Document: NSDocument {
         windowController.contentViewController?.representedObject = viewModel
     }
     
-    override func write(to url: URL, ofType typeName: String) throws {
-        guard let pcmBuffer = viewModel.pcmBuffer else {
-            throw NSError(domain: NSOSStatusErrorDomain, code: unimpErr, userInfo: nil)
-        }
-        
-        try AVAudioFile(url: url, fromBuffer: pcmBuffer)
-    }
-    
     override func read(from url: URL, ofType typeName: String) throws {
-        viewModel.readAudioFile(at: url)
+        let file = try AVAudioFile(forReading: url)
+        file.framePosition = 0
+        
+        guard let aBuffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat,
+                                             frameCapacity: AVAudioFrameCount(file.length))
+        else { throw AVError(.unknown) }
+        
+        try file.read(into: aBuffer)
+        
+        viewModel.pcmBuffer = aBuffer
+        viewModel.fileFormat = file.fileFormat
+        viewModel.processingFormat = file.processingFormat
+        
+        viewModel.samples = aBuffer.compressed()
+        viewModel.selectedTimeRange = nil
+        viewModel.currentTime = .zero
     }
 }
 
