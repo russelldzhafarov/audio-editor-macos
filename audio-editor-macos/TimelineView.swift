@@ -83,7 +83,7 @@ class TimelineView: NSView {
         CATransaction.setDisableActions(true)
         
         let oneSecWidth = bounds.width / CGFloat(viewModel.duration)
-        let cursorPos = CGFloat(viewModel.player.currentTime) * oneSecWidth
+        let cursorPos = CGFloat(viewModel.currentTime) * oneSecWidth
         cursorLayer.frame = NSRect(x: cursorPos,
                                    y: viewModel.rulerHeight,
                                    width: 1.0,
@@ -154,8 +154,7 @@ class TimelineView: NSView {
         
         let start = convert(event.locationInWindow, from: nil)
         
-        let duration = viewModel.visibleTimeRange.upperBound - viewModel.visibleTimeRange.lowerBound
-        let startTime = viewModel.visibleTimeRange.lowerBound + (duration * Double(start.x) / Double(bounds.width))
+        let startTime = (viewModel.duration * Double(start.x) / Double(bounds.width))
         
         while true {
             guard let nextEvent = window?.nextEvent(matching: [.leftMouseUp, .leftMouseDragged]) else { continue }
@@ -164,28 +163,28 @@ class TimelineView: NSView {
             
             if Int(start.x) == Int(end.x) && Int(start.y) == Int(end.y) {
                 viewModel.selectedTimeRange = nil
-                viewModel.player.currentTime = startTime.clamped(to: .zero ... viewModel.duration)
+                viewModel.currentTime = startTime.clamped(to: .zero ... viewModel.duration)
                 
             } else {
                 
-                let endTime = viewModel.visibleTimeRange.lowerBound + (duration * Double(end.x) / Double(bounds.width))
+                let endTime = (viewModel.duration * Double(end.x) / Double(bounds.width))
                 
                 if startTime < endTime {
                     viewModel.selectedTimeRange = (startTime ... endTime).clamped(to: .zero ... viewModel.duration)
-                    viewModel.player.currentTime = startTime.clamped(to: .zero ... viewModel.duration)
+                    viewModel.currentTime = startTime.clamped(to: .zero ... viewModel.duration)
                     
                 } else if startTime > endTime {
                     viewModel.selectedTimeRange = (endTime ... startTime).clamped(to: .zero ... viewModel.duration)
-                    viewModel.player.currentTime = endTime.clamped(to: .zero ... viewModel.duration)
+                    viewModel.currentTime = endTime.clamped(to: .zero ... viewModel.duration)
                     
                 } else {
                     viewModel.selectedTimeRange = nil
-                    viewModel.player.currentTime = startTime.clamped(to: .zero ... viewModel.duration)
+                    viewModel.currentTime = startTime.clamped(to: .zero ... viewModel.duration)
                 }
             }
             
             if nextEvent.type == .leftMouseUp {
-                viewModel.seek(to: viewModel.player.currentTime)
+                viewModel.seek(to: viewModel.currentTime)
                 break
             }
         }
