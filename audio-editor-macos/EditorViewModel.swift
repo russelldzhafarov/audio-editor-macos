@@ -1,6 +1,6 @@
 //
-//  ViewModel.swift
-//  audio-editor-macos
+//  EditorViewModel.swift
+//  Audio Editor
 //
 //  Created by russell.dzhafarov@gmail.com on 10.08.2021.
 //
@@ -10,50 +10,37 @@ import AVFoundation
 import Accelerate
 import AppKit
 
-extension ViewModel.AppError: LocalizedError {
-    var errorDescription: String? {
-        switch self {
-        case .edit:
-            return "Can't edit file."
-        case .formatMismatch:
-            return "Can't paste: Format mismatch."
-        case .read:
-            return "Can't read file."
-        }
+extension Comparable {
+    func clamped(to limits: ClosedRange<Self>) -> Self {
+        return min(max(self, limits.lowerBound), limits.upperBound)
     }
 }
 
-class ViewModel: ObservableObject {
+class EditorViewModel: ObservableObject {
+    
+    let rulerHeight = CGFloat(32)
     
     var acceptableUTITypes: [String] {
-        ["public.mp3", "com.apple.m4a-audio", "com.microsoft.waveform-audio"]
+        [AVFileType.mp3.rawValue,
+         AVFileType.m4a.rawValue,
+         AVFileType.wav.rawValue]
     }
-    
-    let player = AudioPlayer()
     
     var pcmBuffer: AVAudioPCMBuffer?
-    var amps: [Float] = []
+    var fileFormat: AVAudioFormat?
+    var processingFormat: AVAudioFormat?
+    
+    var samples: [Float] = []
     
     enum State {
-        case empty, processing, ready
-    }
-    enum AppError: Error {
-        case edit
-        case formatMismatch
-        case read
+        case processing, ready
     }
     
-    @Published var selectedTimeRange: Range<TimeInterval>?
-    @Published var visibleTimeRange: Range<TimeInterval> = 0.0 ..< 0.0
-    @Published var highlighted = false
-    @Published var state: State = .empty
+    @Published var selectedTimeRange: ClosedRange<TimeInterval>?
+    @Published var state: State = .ready
     
     var duration: TimeInterval {
-        pcmBuffer?.duration ?? TimeInterval(0)
-    }
-    
-    var visibleDur: TimeInterval {
-        visibleTimeRange.upperBound - visibleTimeRange.lowerBound
+        pcmBuffer?.duration ?? .zero
     }
     
     private let serviceQueue: OperationQueue = {
@@ -66,16 +53,47 @@ class ViewModel: ObservableObject {
     
     var undoManager: UndoManager?
     
+    enum PlayerState {
+        case playing, stopped
+    }
+    
+    @Published var playerState: PlayerState = .stopped
+    @Published var currentTime: TimeInterval = .zero
+    
+    private let engine = AVAudioEngine()
+    private var playerNode = AVAudioPlayerNode()
+    private var timer: Timer?
+    
+    private var currentFrame: AVAudioFramePosition {
+        guard
+            let lastRenderTime = playerNode.lastRenderTime,
+            let playerTime = playerNode.playerTime(forNodeTime: lastRenderTime)
+        else {
+            return 0
+        }
+        
+        return playerTime.sampleTime
+    }
+    
+    deinit {
+        timer?.invalidate()
+        timer = nil
+    }
+    
     var status: String? {
         guard let pcmBuffer = pcmBuffer else { return nil }
         return "\(pcmBuffer.sampleRate / Double(1000)) kHz  |  \(pcmBuffer.channelCount == 1 ? "Mono" : "Stereo")  |  \(pcmBuffer.duration.mmss())"
+    }
+    
+    func selectAll() {
+        selectedTimeRange = .zero ... duration
     }
     
     // MARK: - Undo / Redo Operations
     func delete(start: TimeInterval, end: TimeInterval) {
         let edited = pcmBuffer?.remove(startTime: start, endTime: end)
         guard let removed = pcmBuffer?.extract(from: start, to: end) else {
-            self.error = AppError.edit
+            self.error = AVError(.unknown)
             return
         }
         
@@ -85,15 +103,16 @@ class ViewModel: ObservableObject {
         undoManager?.setActionName("Delete")
         
         pcmBuffer = edited
-        amps = edited?.compressed() ?? []
-        state = .ready
+        samples = edited?.compressed() ?? []
         selectedTimeRange = nil
-        visibleTimeRange = visibleTimeRange.clamped(to: 0.0..<(edited?.duration ?? 0.0))
+        
+        state = .ready
     }
     
     func paste(buffer: AVAudioPCMBuffer, at time: TimeInterval) {
         if let pcmBuffer = pcmBuffer, buffer.format != pcmBuffer.format {
-            self.error = AppError.formatMismatch
+            // FIXME: Convert to current format
+            self.error = AVError(.unknown)
             return
         }
         
@@ -105,11 +124,9 @@ class ViewModel: ObservableObject {
         undoManager?.setActionName("Paste")
         
         pcmBuffer = edited
-        amps = edited.compressed()
-        selectedTimeRange = time ..< (time + buffer.duration)
-        if visibleTimeRange.isEmpty, let selectedTimeRange = selectedTimeRange {
-            visibleTimeRange = selectedTimeRange
-        }
+        samples = edited.compressed()
+        selectedTimeRange = time ... (time + buffer.duration)
+        
         state = .ready
     }
     
@@ -123,7 +140,7 @@ class ViewModel: ObservableObject {
                 self.state = .ready
             }
             guard let buffer = pcmBuffer.extract(from: selectedTimeRange.lowerBound, to: selectedTimeRange.upperBound) else {
-                self.error = AppError.edit
+                self.error = AVError(.unknown)
                 return
             }
             
@@ -138,12 +155,12 @@ class ViewModel: ObservableObject {
     func paste() {
         do {
             guard let buffer = try AVAudioPCMBuffer.read(from: NSPasteboard.general) else {
-                throw AppError.edit
+                throw AVError(.unknown)
             }
             stop()
             state = .processing
             serviceQueue.addOperation {
-                self.paste(buffer: buffer, at: self.player.currentTime)
+                self.paste(buffer: buffer, at: self.currentTime)
                 self.state = .ready
             }
             
@@ -169,18 +186,18 @@ class ViewModel: ObservableObject {
     }
     
     func seek(to time: TimeInterval) {
-        let wasPlaying = player.state == .playing
+        let wasPlaying = playerState == .playing
         if wasPlaying {
             stop()
         }
-        player.currentTime = time.clamped(to: 0.0...duration)
+        currentTime = time.clamped(to: .zero ... duration)
         if wasPlaying {
             play()
         }
     }
     
     func play() {
-        switch player.state {
+        switch playerState {
         case .playing:
             stop()
             
@@ -190,11 +207,17 @@ class ViewModel: ObservableObject {
         }
     }
     func stop() {
-        player.stop()
+        playerNode.stop()
+        engine.stop()
+        
+        timer?.invalidate()
+        timer = nil
+        
+        playerState = .stopped
     }
     func forward() {
         selectedTimeRange = nil
-        seek(to: player.currentTime + TimeInterval(15))
+        seek(to: currentTime + 15.0)
     }
     func forwardEnd() {
         selectedTimeRange = nil
@@ -202,74 +225,43 @@ class ViewModel: ObservableObject {
     }
     func backward() {
         selectedTimeRange = nil
-        seek(to: player.currentTime - TimeInterval(15))
+        seek(to: currentTime - 15.0)
     }
     func backwardEnd() {
         selectedTimeRange = nil
-        seek(to: TimeInterval(0))
-    }
-    
-    public func power(at time: TimeInterval) -> Float {
-        guard let pcmBuffer = pcmBuffer else { return 0 }
-        let sampleRate = Double(amps.count) / pcmBuffer.duration
-        
-        let index = Int(time * sampleRate)
-        
-        guard amps.indices.contains(index) else { return .zero }
-        
-        let power = amps[index]
-        
-        let avgPower = 20 * log10(power)
-        
-        return scaledPower(power: avgPower)
-    }
-    
-    private func scaledPower(power: Float) -> Float {
-        guard power.isFinite else {
-            return 0.0
-        }
-        
-        let minDb: Float = -80
-        
-        if power < minDb {
-            return 0.0
-        } else if power >= 1.0 {
-            return 1.0
-        } else {
-            return (abs(minDb) - abs(power)) / abs(minDb)
-        }
+        seek(to: .zero)
     }
     
     func play(buffer: AVAudioPCMBuffer) {
-        if player.currentTime >= buffer.duration {
-            player.currentTime = 0.0
+        if currentTime >= buffer.duration {
+            currentTime = .zero
         }
-        if player.currentTime < 0.0 {
-            player.currentTime = 0.0
+        if currentTime < .zero {
+            currentTime = .zero
         }
         
         do {
             if let selectedTimeRange = selectedTimeRange {
                 guard let segment = buffer.extract(from: selectedTimeRange.lowerBound, to: selectedTimeRange.upperBound) else {
-                    self.error = AppError.edit
+                    self.error = AVError(.unknown)
                     return
                 }
                 
-                try player.play(buffer: segment)
+                try playBuffer(segment)
                 
             } else {
-                if player.currentTime == .zero {
-                    try player.play(buffer: buffer)
+                if currentTime == .zero {
+                    try playBuffer(buffer)
                     
                 } else {
-                    guard player.currentTime < buffer.duration,
-                          let segment = buffer.extract(from: player.currentTime, to: buffer.duration)
+                    guard currentTime < buffer.duration,
+                          let segment = buffer.extract(from: currentTime, to: buffer.duration)
                     else {
-                        self.error = AppError.edit
+                        self.error = AVError(.unknown)
                         return
                     }
                     
-                    try player.play(buffer: segment)
+                    try playBuffer(segment)
                 }
             }
         } catch {
@@ -277,31 +269,45 @@ class ViewModel: ObservableObject {
         }
     }
     
-    func readAudioFile(at url: URL) {
-        stop()
-        state = .processing
+    func saveFile(to url: URL) throws {
+        guard let pcmBuffer = pcmBuffer,
+              let fileFormat = fileFormat,
+              let processingFormat = processingFormat else { throw AVError(.unknown) }
         
-        serviceQueue.addOperation {
-            defer {
-                self.state = .ready
-            }
-            do {
-                self.pcmBuffer = try AVAudioPCMBuffer(url: url)
-                
-                if let buffer = self.pcmBuffer {
-                    
-                    self.amps = buffer.compressed()
-                    self.visibleTimeRange = 0.0 ..< buffer.duration
-                    self.selectedTimeRange = nil
-                    self.player.currentTime = 0.0
-                    
-                } else {
-                    self.error = AppError.read
-                }
-                
-            } catch {
-                self.error = error
+        var settings = fileFormat.settings
+        settings[AVFormatIDKey] = kAudioFormatMPEG4AAC
+        
+        let file = try AVAudioFile(forWriting: url,
+                                   settings: settings,
+                                   commonFormat: processingFormat.commonFormat,
+                                   interleaved: processingFormat.isInterleaved)
+        try file.write(from: pcmBuffer)
+    }
+    
+    func playBuffer(_ buffer: AVAudioPCMBuffer) throws {
+        if !engine.isRunning {
+            engine.attach(playerNode)
+            engine.connect(playerNode, to: engine.mainMixerNode, format: buffer.format)
+            engine.prepare()
+            try engine.start()
+            playerNode.play()
+        }
+        
+        playerNode.scheduleBuffer(buffer)
+        
+        playerState = .playing
+        
+        let seekTime = currentTime
+        let endTime = selectedTimeRange?.upperBound ?? duration
+        timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(0.025), repeats: true) { [weak self] _ in
+            guard let strongSelf = self else { return }
+            
+            strongSelf.currentTime = seekTime + (Double(strongSelf.currentFrame) / buffer.sampleRate)
+            
+            if strongSelf.currentTime >= endTime {
+                strongSelf.stop()
             }
         }
+        timer?.fire()
     }
 }
