@@ -11,25 +11,18 @@
                 <application id="hnw-xV-0zn" sceneMemberID="viewController">
                     <menu key="mainMenu" title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
                         <items>
-                            <menuItem title="audio-editor-macos" id="1Xt-HY-uBw">
+                            <menuItem title="Audio Editor" id="1Xt-HY-uBw">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="audio-editor-macos" systemMenu="apple" id="uQy-DD-JDr">
+                                <menu key="submenu" title="Audio Editor" systemMenu="apple" id="uQy-DD-JDr">
                                     <items>
-                                        <menuItem title="About audio-editor-macos" id="5kV-Vb-QxS">
+                                        <menuItem title="About Audio Editor" id="5kV-Vb-QxS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
-                                        <menuItem title="Preferences…" keyEquivalent="," id="BOF-NM-1cW"/>
-                                        <menuItem isSeparatorItem="YES" id="wFC-TO-SCJ"/>
-                                        <menuItem title="Services" id="NMo-om-nkz">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Services" systemMenu="services" id="hz9-B4-Xy5"/>
-                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="4je-JR-u6R"/>
-                                        <menuItem title="Hide audio-editor-macos" keyEquivalent="h" id="Olw-nP-bQN">
+                                        <menuItem title="Hide Audio Editor" keyEquivalent="h" id="Olw-nP-bQN">
                                             <connections>
                                                 <action selector="hide:" target="Ady-hI-5gd" id="PnN-Uc-m68"/>
                                             </connections>
@@ -47,7 +40,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                                        <menuItem title="Quit audio-editor-macos" keyEquivalent="q" id="4sb-4s-VLi">
+                                        <menuItem title="Quit Audio Editor" keyEquivalent="q" id="4sb-4s-VLi">
                                             <connections>
                                                 <action selector="terminate:" target="Ady-hI-5gd" id="Te7-pn-YzF"/>
                                             </connections>
@@ -59,11 +52,6 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="File" id="bib-Uj-vzu">
                                     <items>
-                                        <menuItem title="New" keyEquivalent="n" id="Was-JA-tGl">
-                                            <connections>
-                                                <action selector="newDocument:" target="Ady-hI-5gd" id="4Si-XN-c54"/>
-                                            </connections>
-                                        </menuItem>
                                         <menuItem title="Open…" keyEquivalent="o" id="IAo-SY-fd9">
                                             <connections>
                                                 <action selector="openDocument:" target="Ady-hI-5gd" id="bVn-NM-KNZ"/>
@@ -86,21 +74,6 @@
                                         <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
                                             <connections>
                                                 <action selector="performClose:" target="Ady-hI-5gd" id="HmO-Ls-i7Q"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Save…" keyEquivalent="s" id="pxx-59-PXV">
-                                            <connections>
-                                                <action selector="saveDocument:" target="Ady-hI-5gd" id="teZ-XB-qJY"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Save As…" keyEquivalent="S" id="Bw7-FT-i3A">
-                                            <connections>
-                                                <action selector="saveDocumentAs:" target="Ady-hI-5gd" id="mDf-zr-I0C"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Revert to Saved" keyEquivalent="r" id="KaW-ft-85H">
-                                            <connections>
-                                                <action selector="revertDocumentToSaved:" target="Ady-hI-5gd" id="iJ3-Pv-kwq"/>
                                             </connections>
                                         </menuItem>
                                     </items>
@@ -150,38 +123,6 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="View" id="H8h-7b-M4v">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="View" id="HyV-fh-RgO">
-                                    <items>
-                                        <menuItem title="Show Toolbar" keyEquivalent="t" id="snW-S8-Cw5">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="toggleToolbarShown:" target="Ady-hI-5gd" id="BXY-wc-z0C"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Customize Toolbar…" id="1UK-8n-QPP">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="runToolbarCustomizationPalette:" target="Ady-hI-5gd" id="pQI-g3-MTW"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="hB3-LF-h0Y"/>
-                                        <menuItem title="Show Sidebar" keyEquivalent="s" id="kIP-vf-haE">
-                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="toggleSidebar:" target="Ady-hI-5gd" id="iwa-gc-5KM"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Enter Full Screen" keyEquivalent="f" id="4J7-dP-txa">
-                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="toggleFullScreen:" target="Ady-hI-5gd" id="dU3-MA-1Rq"/>
-                                            </connections>
-                                        </menuItem>
-                                    </items>
-                                </menu>
-                            </menuItem>
                             <menuItem title="Window" id="aUF-d1-5bR">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Window" systemMenu="window" id="Td7-aD-5lo">
@@ -207,18 +148,6 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Help" id="wpr-3q-Mcd">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
-                                    <items>
-                                        <menuItem title="audio-editor-macos Help" keyEquivalent="?" id="FKE-Sm-Kum">
-                                            <connections>
-                                                <action selector="showHelp:" target="Ady-hI-5gd" id="y7X-2Q-9no"/>
-                                            </connections>
-                                        </menuItem>
-                                    </items>
-                                </menu>
-                            </menuItem>
                         </items>
                     </menu>
                     <connections>
@@ -235,12 +164,13 @@
         <scene sceneID="R2V-B0-nI4">
             <objects>
                 <windowController storyboardIdentifier="Document Window Controller" id="jGA-0Y-lOj" customClass="EditorWindowController" customModule="Audio_Editor" customModuleProvider="target" sceneMemberID="viewController">
-                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" titlebarAppearsTransparent="YES" id="Ckk-yw-fiv">
+                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" appearanceType="darkAqua" animationBehavior="default" titlebarAppearsTransparent="YES" id="Ckk-yw-fiv">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" fullSizeContentView="YES"/>
+                        <windowCollectionBehavior key="collectionBehavior" fullScreenNone="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-                        <rect key="contentRect" x="196" y="240" width="750" height="400"/>
+                        <rect key="contentRect" x="196" y="240" width="680" height="400"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
-                        <value key="minSize" type="size" width="750" height="400"/>
+                        <value key="minSize" type="size" width="680" height="400"/>
                         <connections>
                             <outlet property="delegate" destination="jGA-0Y-lOj" id="98r-iN-zZc"/>
                         </connections>
@@ -321,10 +251,10 @@
                                         </textFieldCell>
                                     </textField>
                                     <button translatesAutoresizingMaskIntoConstraints="NO" id="KDE-hq-DhO">
-                                        <rect key="frame" x="170" y="23.5" width="16" height="24"/>
+                                        <rect key="frame" x="186" y="22.5" width="20" height="26"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="20" id="Cty-oG-EUS"/>
-                                            <constraint firstAttribute="width" constant="16" id="fr7-os-MdO"/>
+                                            <constraint firstAttribute="height" constant="22" id="Cty-oG-EUS"/>
+                                            <constraint firstAttribute="width" constant="20" id="fr7-os-MdO"/>
                                         </constraints>
                                         <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="forward.end.fill" catalog="system" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="WVg-vo-wwC">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -335,10 +265,10 @@
                                         </connections>
                                     </button>
                                     <button translatesAutoresizingMaskIntoConstraints="NO" id="GGv-Mw-bme">
-                                        <rect key="frame" x="134" y="23.5" width="20" height="23"/>
+                                        <rect key="frame" x="146" y="21.5" width="24" height="27"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="20" id="T4f-n8-ufq"/>
-                                            <constraint firstAttribute="width" constant="20" id="cmY-Fd-1fr"/>
+                                            <constraint firstAttribute="height" constant="24" id="T4f-n8-ufq"/>
+                                            <constraint firstAttribute="width" constant="24" id="cmY-Fd-1fr"/>
                                         </constraints>
                                         <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="forward.fill" catalog="system" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="69g-sU-Yq9">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -349,10 +279,10 @@
                                         </connections>
                                     </button>
                                     <button translatesAutoresizingMaskIntoConstraints="NO" id="YFP-iG-Wna">
-                                        <rect key="frame" x="30" y="23.5" width="16" height="24"/>
+                                        <rect key="frame" x="30" y="22.5" width="20" height="26"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="20" id="7nF-ry-MO9"/>
-                                            <constraint firstAttribute="width" constant="16" id="EdF-ST-ysI"/>
+                                            <constraint firstAttribute="height" constant="22" id="7nF-ry-MO9"/>
+                                            <constraint firstAttribute="width" constant="20" id="EdF-ST-ysI"/>
                                         </constraints>
                                         <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="backward.end.fill" catalog="system" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="mU7-16-M6l">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -363,10 +293,10 @@
                                         </connections>
                                     </button>
                                     <button translatesAutoresizingMaskIntoConstraints="NO" id="msf-sX-BXV">
-                                        <rect key="frame" x="62" y="23.5" width="20" height="23"/>
+                                        <rect key="frame" x="66" y="21.5" width="24" height="27"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="20" id="MQq-Do-MN1"/>
-                                            <constraint firstAttribute="height" constant="20" id="xGR-vZ-SAo"/>
+                                            <constraint firstAttribute="width" constant="24" id="MQq-Do-MN1"/>
+                                            <constraint firstAttribute="height" constant="24" id="xGR-vZ-SAo"/>
                                         </constraints>
                                         <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="backward.fill" catalog="system" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="vni-6K-Spk">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -377,10 +307,10 @@
                                         </connections>
                                     </button>
                                     <button translatesAutoresizingMaskIntoConstraints="NO" id="m1c-M9-dog">
-                                        <rect key="frame" x="98" y="23" width="20.5" height="24"/>
+                                        <rect key="frame" x="106" y="21" width="24.5" height="28"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="20" id="D8i-l4-qAv"/>
-                                            <constraint firstAttribute="width" constant="20" id="UC1-Qh-Bbr"/>
+                                            <constraint firstAttribute="height" constant="24" id="D8i-l4-qAv"/>
+                                            <constraint firstAttribute="width" constant="24" id="UC1-Qh-Bbr"/>
                                         </constraints>
                                         <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="play.fill" catalog="system" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="TIP-Up-Q4x">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -435,8 +365,8 @@
                                 <rect key="frame" x="0.0" y="101" width="680" height="239"/>
                             </customView>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="UTE-uc-8Sp">
-                                <rect key="frame" x="18" y="7" width="259" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Drop media file to timeline or hit Cmd + O." id="aPj-3c-uw0">
+                                <rect key="frame" x="18" y="7" width="42" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Ready" id="aPj-3c-uw0">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -475,6 +405,49 @@
                 <customObject id="2Tp-Fl-jBw" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="74" y="848"/>
+        </scene>
+        <!--Progress View Controller-->
+        <scene sceneID="OHj-YV-1U2">
+            <objects>
+                <viewController storyboardIdentifier="ProgressViewController" id="poD-Ju-8fd" customClass="ProgressViewController" customModule="Audio_Editor" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" appearanceType="darkAqua" id="s8q-Bw-BzN">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <box boxType="custom" borderType="none" borderWidth="0.0" cornerRadius="8" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="mHe-ip-TNH">
+                                <rect key="frame" x="181" y="106" width="88" height="88"/>
+                                <view key="contentView" id="mUk-JR-t2Q">
+                                    <rect key="frame" x="0.0" y="0.0" width="88" height="88"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <progressIndicator wantsLayer="YES" maxValue="100" indeterminate="YES" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="36V-U8-3Oz">
+                                            <rect key="frame" x="28" y="28" width="32" height="32"/>
+                                        </progressIndicator>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="36V-U8-3Oz" firstAttribute="centerY" secondItem="mUk-JR-t2Q" secondAttribute="centerY" id="ASS-zN-MEI"/>
+                                        <constraint firstItem="36V-U8-3Oz" firstAttribute="centerX" secondItem="mUk-JR-t2Q" secondAttribute="centerX" id="WOG-Bd-Nod"/>
+                                    </constraints>
+                                </view>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="88" id="m1A-fJ-2JH"/>
+                                    <constraint firstAttribute="height" constant="88" id="o8x-8C-7Vd"/>
+                                </constraints>
+                                <color key="fillColor" red="0.19215686269999999" green="0.20392156859999999" blue="0.25098039220000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </box>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="mHe-ip-TNH" firstAttribute="centerY" secondItem="s8q-Bw-BzN" secondAttribute="centerY" id="PBj-ah-DeM"/>
+                            <constraint firstItem="mHe-ip-TNH" firstAttribute="centerX" secondItem="s8q-Bw-BzN" secondAttribute="centerX" id="pSF-BV-XYt"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="progressIndicator" destination="36V-U8-3Oz" id="AOZ-zC-Ben"/>
+                    </connections>
+                </viewController>
+                <customObject id="ueb-hZ-7aq" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="29" y="1289"/>
         </scene>
     </scenes>
     <resources>
