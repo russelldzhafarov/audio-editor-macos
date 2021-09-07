@@ -16,8 +16,6 @@ class CursorLayer: CALayer {
     var viewModel: EditorViewModel?
     
     override func draw(in ctx: CGContext) {
-        guard let viewModel = viewModel,
-              viewModel.visibleTimeRange.contains(viewModel.player.currentTime) else { return }
         
         ctx.move(to: CGPoint(x: bounds.midX, y: .zero))
         ctx.addLine(to: CGPoint(x: bounds.midX, y: bounds.height))
