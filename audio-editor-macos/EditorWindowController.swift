@@ -1,6 +1,6 @@
 //
-//  WindowController.swift
-//  audio-editor-macos
+//  EditorWindowController.swift
+//  Audio Editor
 //
 //  Created by russell.dzhafarov@gmail.com on 09.08.2021.
 //
@@ -8,9 +8,42 @@
 import Cocoa
 import AVFoundation
 
-class WindowController: NSWindowController {
+extension NSStoryboard.Name {
+    static let main = NSStoryboard.Name("Main")
+}
 
-    var viewModel: ViewModel?
+extension NSStoryboard.SceneIdentifier {
+    static let document = NSStoryboard.SceneIdentifier("Document Window Controller")
+    static let progressViewController = NSStoryboard.SceneIdentifier("ProgressViewController")
+}
+
+extension NSImage.Name {
+    static let undo = NSImage.Name("arrow.uturn.backward")
+    static let redo = NSImage.Name("arrow.uturn.forward")
+    static let cut = NSImage.Name("scissors")
+    static let copy = NSImage.Name("doc.on.clipboard")
+    static let paste = NSImage.Name("doc.on.doc")
+    static let delete = NSImage.Name("trash")
+    static let play = NSImage.Name("play.fill")
+    static let pause = NSImage.Name("pause.fill")
+}
+
+extension NSToolbar.Identifier {
+    static let toolbarIdentifier = NSToolbar.Identifier("MainWindowToolbarIdentifier")
+}
+
+extension NSToolbarItem.Identifier {
+    static let undo = NSToolbarItem.Identifier(rawValue: "undoToolbarItemIdentifier")
+    static let redo = NSToolbarItem.Identifier(rawValue: "redoToolbarItemIdentifier")
+    static let cut = NSToolbarItem.Identifier(rawValue: "cutToolbarItemIdentifier")
+    static let copy = NSToolbarItem.Identifier(rawValue: "copyToolbarItemIdentifier")
+    static let paste = NSToolbarItem.Identifier(rawValue: "pasteToolbarItemIdentifier")
+    static let delete = NSToolbarItem.Identifier(rawValue: "deleteToolbarItemIdentifier")
+}
+
+class EditorWindowController: NSWindowController {
+
+    var viewModel: EditorViewModel?
     
     override func windowDidLoad() {
         super.windowDidLoad()
@@ -40,7 +73,7 @@ class WindowController: NSWindowController {
     @IBAction func delete(_ sender: Any) { viewModel?.delete() }
 }
 
-extension WindowController: NSMenuItemValidation {
+extension EditorWindowController: NSMenuItemValidation {
     func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
         switch menuItem.action {
         case #selector(cut(_:)):
@@ -57,7 +90,7 @@ extension WindowController: NSMenuItemValidation {
     }
 }
 
-extension WindowController: NSToolbarItemValidation {
+extension EditorWindowController: NSToolbarItemValidation {
     func validateToolbarItem(_ item: NSToolbarItem) -> Bool {
         switch item.itemIdentifier {
         case .undo:
@@ -78,7 +111,7 @@ extension WindowController: NSToolbarItemValidation {
     }
 }
 
-extension WindowController: NSToolbarDelegate {
+extension EditorWindowController: NSToolbarDelegate {
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
         [.undo, .redo, .space, .cut, .copy, .paste, .delete, .flexibleSpace]
     }
