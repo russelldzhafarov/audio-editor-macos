@@ -1,6 +1,6 @@
 //
-//  ViewController.swift
-//  audio-editor-macos
+//  EditorViewController.swift
+//  Audio Editor
 //
 //  Created by russell.dzhafarov@gmail.com on 09.08.2021.
 //
@@ -8,10 +8,9 @@
 import Cocoa
 import Combine
 
-class ViewController: NSViewController {
+class EditorViewController: NSViewController {
     
-    @IBOutlet weak var hintLabel: NSTextField!
-    @IBOutlet weak var hintImageView: NSImageView!
+    @IBOutlet weak var timelineView: TimelineView!
     @IBOutlet weak var currentTimeLabel: NSTextField!
     @IBOutlet weak var selectionStartTimeLabel: NSTextField!
     @IBOutlet weak var selectionEndTimeLabel: NSTextField!
@@ -19,15 +18,9 @@ class ViewController: NSViewController {
     @IBOutlet weak var statusLabel: NSTextField!
     @IBOutlet weak var fileFormatLabel: NSTextField!
     @IBOutlet weak var playButton: NSButton!
-    @IBOutlet weak var progressView: NSView!
-    @IBOutlet weak var progressIndicator: NSProgressIndicator!
     
-    @IBOutlet weak var rulerView: RulerView!
-    @IBOutlet weak var overlayView: OverlayView!
-    @IBOutlet weak var waveformView: WaveformView!
-    
-    var viewModel: ViewModel? {
-        representedObject as? ViewModel
+    var viewModel: EditorViewModel? {
+        representedObject as? EditorViewModel
     }
     
     private var cancellables = Set<AnyCancellable>()
@@ -40,12 +33,10 @@ class ViewController: NSViewController {
     override var representedObject: Any? {
         didSet {
             // Update the view, if already loaded.
-            guard let viewModel = representedObject as? ViewModel,
+            guard let viewModel = representedObject as? EditorViewModel,
                   isViewLoaded else { return }
             
-            rulerView.viewModel = viewModel
-            overlayView.viewModel = viewModel
-            waveformView.viewModel = viewModel
+            timelineView.viewModel = viewModel
             
             viewModel.$error
                 .receive(on: DispatchQueue.main)
@@ -60,7 +51,7 @@ class ViewController: NSViewController {
                 }
                 .store(in: &cancellables)
             
-            viewModel.player.$state
+            viewModel.$playerState
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] newValue in
                     switch newValue {
@@ -72,10 +63,10 @@ class ViewController: NSViewController {
                 }
                 .store(in: &cancellables)
             
-            viewModel.player.$currentTime
+            viewModel.$currentTime
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] newValue in
-                    self?.overlayView.needsDisplay = true
+                    self?.timelineView.updateCursorLayer()
                     
                     self?.currentTimeLabel.stringValue = newValue.hhmmssms()
                 }
@@ -84,7 +75,7 @@ class ViewController: NSViewController {
             viewModel.$selectedTimeRange
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] newValue in
-                    self?.overlayView.needsDisplay = true
+                    self?.timelineView.updateSelectionLayer()
                     
                     if let newValue = newValue {
                         self?.selectionStartTimeLabel.stringValue = newValue.lowerBound.mmssms()
@@ -99,59 +90,38 @@ class ViewController: NSViewController {
                 }
                 .store(in: &cancellables)
             
-            viewModel.$visibleTimeRange
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] _ in
-                    self?.waveformView.needsDisplay = true
-                    self?.overlayView.needsDisplay = true
-                    self?.rulerView.needsDisplay = true
-                }
-                .store(in: &cancellables)
-            
             viewModel.$state
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] newValue in
-                    self?.waveformView.needsDisplay = true
-                    self?.overlayView.needsDisplay = true
-                    self?.rulerView.needsDisplay = true
-                    
                     switch newValue {
-                    case .empty:
-                        self?.progressView.isHidden = true
-                        
-                        self?.hintLabel.isHidden = false
-                        self?.hintImageView.isHidden = false
-                        
-                        self?.statusLabel.stringValue = "Drop media file to timeline or hit Cmd + O."
-                        self?.fileFormatLabel.stringValue = ""
-                        
                     case .processing:
-                        self?.progressView.isHidden = false
-                        self?.progressIndicator.startAnimation(nil)
-                        
-                        self?.hintLabel.isHidden = true
-                        self?.hintImageView.isHidden = true
-                        
                         self?.statusLabel.stringValue = "Processing..."
                         self?.fileFormatLabel.stringValue = self?.viewModel?.status ?? ""
                         
-                    case .ready:
-                        self?.progressView.isHidden = true
-                        self?.progressIndicator.stopAnimation(nil)
+                        let storyboard = NSStoryboard(name: .main, bundle: nil)
+                        let progressViewController = storyboard.instantiateController(withIdentifier: .progressViewController) as! ProgressViewController
                         
-                        self?.hintLabel.isHidden = true
-                        self?.hintImageView.isHidden = true
+                        progressViewController.view.frame = NSRect(origin: .zero, size: self?.view.window?.frame.size ?? .zero)
+                        
+                        let overlayWindow = NSWindow(contentRect: self?.view.window?.frame ?? .zero,
+                                                     styleMask: .borderless,
+                                                     backing: .buffered,
+                                                     defer: false)
+                        
+                        overlayWindow.contentViewController = progressViewController
+                        overlayWindow.backgroundColor = .clear
+                        overlayWindow.isOpaque = false
+                        
+                        self?.view.window?.addChildWindow(overlayWindow, ordered: .above)
+                        
+                    case .ready:
+                        self?.timelineView.updateLayerFrames()
                         
                         self?.statusLabel.stringValue = "Ready"
                         self?.fileFormatLabel.stringValue = self?.viewModel?.status ?? ""
+                        
+                        self?.view.window?.childWindows?.forEach{ self?.view.window?.removeChildWindow($0); $0.orderOut(nil) }
                     }
-                }
-                .store(in: &cancellables)
-            
-            viewModel.$highlighted
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] newValue in
-                    self?.overlayView.needsDisplay = true
                 }
                 .store(in: &cancellables)
         }
@@ -159,8 +129,7 @@ class ViewController: NSViewController {
     
     // MARK: - Actions
     override func selectAll(_ sender: Any?) {
-        guard let viewModel = viewModel else { return }
-        viewModel.selectedTimeRange = 0.0 ..< viewModel.duration
+        viewModel?.selectAll()
     }
     @IBAction func actionBackwardEnd(_ sender: Any) {
         viewModel?.backwardEnd()
