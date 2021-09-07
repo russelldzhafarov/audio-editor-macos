@@ -38,16 +38,13 @@ class RulerLayer: CALayer {
     override func draw(in ctx: CGContext) {
         guard let viewModel = viewModel else { return }
         
-        let startTime = viewModel.visibleTimeRange.lowerBound
-        
-        let visibleDur = viewModel.visibleDur
-        let oneSecWidth = bounds.width / CGFloat(visibleDur)
+        let oneSecWidth = bounds.width / CGFloat(viewModel.duration)
         
         let step: TimeInterval
         switch oneSecWidth {
         case 0 ..< 5:
             let koeff = Double(bounds.width) / Double(85)
-            step = max(10, (visibleDur / koeff).round(nearest: 10))
+            step = max(10, (viewModel.duration / koeff).round(nearest: 10))
             
         case 5 ..< 10: step = 15
         case 10 ..< 15: step = 10
@@ -58,13 +55,12 @@ class RulerLayer: CALayer {
         default: step = 0.25
         }
         
-        let fixedStartTime = startTime.floor(nearest: step)
-        let x = CGFloat(fixedStartTime - startTime) * oneSecWidth
+        let x: CGFloat = .zero
         
         drawTicks(to: ctx,
                   startPos: x,
-                  startTime: fixedStartTime,
-                  endTime: viewModel.visibleTimeRange.upperBound,
+                  startTime: .zero,
+                  endTime: viewModel.duration,
                   stepInSec: step / Double(10),
                   stepInPx: oneSecWidth * CGFloat(step) / CGFloat(10),
                   drawLabel: false,
@@ -74,8 +70,8 @@ class RulerLayer: CALayer {
         
         drawTicks(to: ctx,
                   startPos: x,
-                  startTime: fixedStartTime,
-                  endTime: viewModel.visibleTimeRange.upperBound,
+                  startTime: .zero,
+                  endTime: viewModel.duration,
                   stepInSec: step,
                   stepInPx: oneSecWidth * CGFloat(step),
                   drawLabel: true,
@@ -94,7 +90,7 @@ class RulerLayer: CALayer {
             
             if drawLabel {
                 NSString(string: stepInSec < 1 ? time.mmssms() : time.mmss())
-                    .draw(at: NSPoint(x: x, y: .zero),
+                    .draw(at: NSPoint(x: x + 2.0, y: .zero),
                           withAttributes: attributes)
             }
             
