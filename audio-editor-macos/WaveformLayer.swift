@@ -25,11 +25,7 @@ class WaveformLayer: CALayer {
         ctx.setFillColor(WaveformLayer.waveformBackgroundColor.cgColor)
         ctx.fill(bounds)
         
-        let startTime = viewModel.visibleTimeRange.lowerBound
-        let endTime = viewModel.visibleTimeRange.upperBound
-        
-        let duration = viewModel.visibleDur
-        let oneSecWidth = bounds.width / CGFloat(duration)
+        let oneSecWidth = bounds.width / CGFloat(viewModel.duration)
         
         let frame = CGRect(x: .zero,
                            y: .zero,
@@ -44,8 +40,8 @@ class WaveformLayer: CALayer {
         
         guard stepInSec > 0 else { return }
         
-        var x = frame.origin.x
-        for time in stride(from: startTime, to: endTime, by: stepInSec) {
+        var x: CGFloat = .zero
+        for time in stride(from: .zero, to: viewModel.duration, by: stepInSec) {
             let power = self.power(at: time)
             
             let heigth = max(CGFloat(1),
