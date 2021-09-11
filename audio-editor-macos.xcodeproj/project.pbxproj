@@ -7,38 +7,42 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		90091B5D26C17689004072E5 /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90091B5C26C17689004072E5 /* WindowController.swift */; };
-		9035B97926D0E12700AA1D37 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9035B97826D0E12700AA1D37 /* AudioPlayer.swift */; };
-		905BF56726C21F740010DBC2 /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905BF56626C21F740010DBC2 /* OverlayView.swift */; };
-		905BF56B26C23E7A0010DBC2 /* RulerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905BF56A26C23E7A0010DBC2 /* RulerView.swift */; };
-		908BBCD126C1A0E000C7D906 /* WaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 908BBCD026C1A0E000C7D906 /* WaveformView.swift */; };
-		908BBCD526C1A75000C7D906 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 908BBCD426C1A75000C7D906 /* ViewModel.swift */; };
+		90091B5D26C17689004072E5 /* EditorWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90091B5C26C17689004072E5 /* EditorWindowController.swift */; };
+		907753A526E6144B00A05445 /* WaveformLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 907753A426E613F600A05445 /* WaveformLayer.swift */; };
+		907753A826E6145900A05445 /* RulerLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 907753A726E6145900A05445 /* RulerLayer.swift */; };
+		908BBCD526C1A75000C7D906 /* EditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 908BBCD426C1A75000C7D906 /* EditorViewModel.swift */; };
+		90A0219126E6759300F4BCC7 /* ProgressViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90A0219026E6759300F4BCC7 /* ProgressViewController.swift */; };
+		90A0219426E67EDC00F4BCC7 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90A0219326E67EDC00F4BCC7 /* Data.swift */; };
 		90DB398A26D0385600BBB256 /* AudioPasteboardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90DB398926D0385600BBB256 /* AudioPasteboardData.swift */; };
 		90E2A7AD26C1715F0026CB1C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90E2A7AC26C1715F0026CB1C /* AppDelegate.swift */; };
-		90E2A7AF26C1715F0026CB1C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90E2A7AE26C1715F0026CB1C /* ViewController.swift */; };
+		90E2A7AF26C1715F0026CB1C /* EditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90E2A7AE26C1715F0026CB1C /* EditorViewController.swift */; };
 		90E2A7B126C1715F0026CB1C /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90E2A7B026C1715F0026CB1C /* Document.swift */; };
 		90E2A7B326C171640026CB1C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 90E2A7B226C171640026CB1C /* Assets.xcassets */; };
 		90E2A7B626C171640026CB1C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 90E2A7B426C171640026CB1C /* Main.storyboard */; };
 		90ED868A26C9A5CB0078B3BE /* AVAudioPCMBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90ED868926C9A5CB0078B3BE /* AVAudioPCMBuffer.swift */; };
+		90FDBF0626E638A40074809E /* TimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90FDBF0526E638A40074809E /* TimeInterval.swift */; };
+		90FDBF0B26E63A330074809E /* TimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90FDBF0A26E63A330074809E /* TimelineView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		90091B5C26C17689004072E5 /* WindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowController.swift; sourceTree = "<group>"; };
-		9035B97826D0E12700AA1D37 /* AudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
-		905BF56626C21F740010DBC2 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
-		905BF56A26C23E7A0010DBC2 /* RulerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulerView.swift; sourceTree = "<group>"; };
-		908BBCD026C1A0E000C7D906 /* WaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformView.swift; sourceTree = "<group>"; };
-		908BBCD426C1A75000C7D906 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
+		90091B5C26C17689004072E5 /* EditorWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorWindowController.swift; sourceTree = "<group>"; };
+		907753A426E613F600A05445 /* WaveformLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformLayer.swift; sourceTree = "<group>"; };
+		907753A726E6145900A05445 /* RulerLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulerLayer.swift; sourceTree = "<group>"; };
+		908BBCD426C1A75000C7D906 /* EditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorViewModel.swift; sourceTree = "<group>"; };
+		90A0219026E6759300F4BCC7 /* ProgressViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressViewController.swift; sourceTree = "<group>"; };
+		90A0219326E67EDC00F4BCC7 /* Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
 		90DB398926D0385600BBB256 /* AudioPasteboardData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPasteboardData.swift; sourceTree = "<group>"; };
-		90E2A7A926C1715F0026CB1C /* audio-editor-macos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "audio-editor-macos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		90E2A7A926C1715F0026CB1C /* Audio Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Audio Editor.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		90E2A7AC26C1715F0026CB1C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		90E2A7AE26C1715F0026CB1C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		90E2A7AE26C1715F0026CB1C /* EditorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorViewController.swift; sourceTree = "<group>"; };
 		90E2A7B026C1715F0026CB1C /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
 		90E2A7B226C171640026CB1C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		90E2A7B526C171640026CB1C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		90E2A7B726C171640026CB1C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		90E2A7B826C171640026CB1C /* audio_editor_macos.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = audio_editor_macos.entitlements; sourceTree = "<group>"; };
 		90ED868926C9A5CB0078B3BE /* AVAudioPCMBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioPCMBuffer.swift; sourceTree = "<group>"; };
+		90FDBF0526E638A40074809E /* TimeInterval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeInterval.swift; sourceTree = "<group>"; };
+		90FDBF0A26E63A330074809E /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,7 +67,7 @@
 		90E2A7AA26C1715F0026CB1C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				90E2A7A926C1715F0026CB1C /* audio-editor-macos.app */,
+				90E2A7A926C1715F0026CB1C /* Audio Editor.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -73,15 +77,17 @@
 			children = (
 				90E2A7AC26C1715F0026CB1C /* AppDelegate.swift */,
 				90E2A7B026C1715F0026CB1C /* Document.swift */,
-				90091B5C26C17689004072E5 /* WindowController.swift */,
-				90E2A7AE26C1715F0026CB1C /* ViewController.swift */,
-				908BBCD426C1A75000C7D906 /* ViewModel.swift */,
-				908BBCD026C1A0E000C7D906 /* WaveformView.swift */,
-				905BF56626C21F740010DBC2 /* OverlayView.swift */,
-				905BF56A26C23E7A0010DBC2 /* RulerView.swift */,
+				90091B5C26C17689004072E5 /* EditorWindowController.swift */,
+				90E2A7AE26C1715F0026CB1C /* EditorViewController.swift */,
+				908BBCD426C1A75000C7D906 /* EditorViewModel.swift */,
+				90A0219026E6759300F4BCC7 /* ProgressViewController.swift */,
+				90FDBF0A26E63A330074809E /* TimelineView.swift */,
+				907753A426E613F600A05445 /* WaveformLayer.swift */,
+				907753A726E6145900A05445 /* RulerLayer.swift */,
 				90ED868926C9A5CB0078B3BE /* AVAudioPCMBuffer.swift */,
 				90DB398926D0385600BBB256 /* AudioPasteboardData.swift */,
-				9035B97826D0E12700AA1D37 /* AudioPlayer.swift */,
+				90FDBF0526E638A40074809E /* TimeInterval.swift */,
+				90A0219326E67EDC00F4BCC7 /* Data.swift */,
 				90E2A7B226C171640026CB1C /* Assets.xcassets */,
 				90E2A7B426C171640026CB1C /* Main.storyboard */,
 				90E2A7B726C171640026CB1C /* Info.plist */,
@@ -93,9 +99,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		90E2A7A826C1715F0026CB1C /* audio-editor-macos */ = {
+		90E2A7A826C1715F0026CB1C /* Audio Editor */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 90E2A7BB26C171640026CB1C /* Build configuration list for PBXNativeTarget "audio-editor-macos" */;
+			buildConfigurationList = 90E2A7BB26C171640026CB1C /* Build configuration list for PBXNativeTarget "Audio Editor" */;
 			buildPhases = (
 				90E2A7A526C1715F0026CB1C /* Sources */,
 				90E2A7A626C1715F0026CB1C /* Frameworks */,
@@ -105,9 +111,9 @@
 			);
 			dependencies = (
 			);
-			name = "audio-editor-macos";
+			name = "Audio Editor";
 			productName = "audio-editor-macos";
-			productReference = 90E2A7A926C1715F0026CB1C /* audio-editor-macos.app */;
+			productReference = 90E2A7A926C1715F0026CB1C /* Audio Editor.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -137,7 +143,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				90E2A7A826C1715F0026CB1C /* audio-editor-macos */,
+				90E2A7A826C1715F0026CB1C /* Audio Editor */,
 			);
 		};
 /* End PBXProject section */
@@ -159,17 +165,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				90E2A7AF26C1715F0026CB1C /* ViewController.swift in Sources */,
-				90091B5D26C17689004072E5 /* WindowController.swift in Sources */,
-				9035B97926D0E12700AA1D37 /* AudioPlayer.swift in Sources */,
-				905BF56726C21F740010DBC2 /* OverlayView.swift in Sources */,
+				90E2A7AF26C1715F0026CB1C /* EditorViewController.swift in Sources */,
+				90A0219426E67EDC00F4BCC7 /* Data.swift in Sources */,
+				90091B5D26C17689004072E5 /* EditorWindowController.swift in Sources */,
 				90ED868A26C9A5CB0078B3BE /* AVAudioPCMBuffer.swift in Sources */,
-				908BBCD126C1A0E000C7D906 /* WaveformView.swift in Sources */,
-				908BBCD526C1A75000C7D906 /* ViewModel.swift in Sources */,
+				90A0219126E6759300F4BCC7 /* ProgressViewController.swift in Sources */,
+				907753A526E6144B00A05445 /* WaveformLayer.swift in Sources */,
+				908BBCD526C1A75000C7D906 /* EditorViewModel.swift in Sources */,
+				90FDBF0626E638A40074809E /* TimeInterval.swift in Sources */,
 				90E2A7AD26C1715F0026CB1C /* AppDelegate.swift in Sources */,
 				90DB398A26D0385600BBB256 /* AudioPasteboardData.swift in Sources */,
+				907753A826E6145900A05445 /* RulerLayer.swift in Sources */,
 				90E2A7B126C1715F0026CB1C /* Document.swift in Sources */,
-				905BF56B26C23E7A0010DBC2 /* RulerView.swift in Sources */,
+				90FDBF0B26E63A330074809E /* TimelineView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -354,7 +362,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		90E2A7BB26C171640026CB1C /* Build configuration list for PBXNativeTarget "audio-editor-macos" */ = {
+		90E2A7BB26C171640026CB1C /* Build configuration list for PBXNativeTarget "Audio Editor" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				90E2A7BC26C171640026CB1C /* Debug */,

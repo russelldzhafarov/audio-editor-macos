@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "90E2A7A826C1715F0026CB1C"
-               BuildableName = "audio-editor-macos.app"
-               BlueprintName = "audio-editor-macos"
+               BuildableName = "Audio Editor.app"
+               BlueprintName = "Audio Editor"
                ReferencedContainer = "container:audio-editor-macos.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,11 +45,18 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "90E2A7A826C1715F0026CB1C"
-            BuildableName = "audio-editor-macos.app"
-            BlueprintName = "audio-editor-macos"
+            BuildableName = "Audio Editor.app"
+            BlueprintName = "Audio Editor"
             ReferencedContainer = "container:audio-editor-macos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "CG_NUMERICS_SHOW_BACKTRACE"
+            value = ""
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -62,8 +69,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "90E2A7A826C1715F0026CB1C"
-            BuildableName = "audio-editor-macos.app"
-            BlueprintName = "audio-editor-macos"
+            BuildableName = "Audio Editor.app"
+            BlueprintName = "Audio Editor"
             ReferencedContainer = "container:audio-editor-macos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

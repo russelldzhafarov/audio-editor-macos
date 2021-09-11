@@ -1,6 +1,6 @@
 //
 //  AudioPasteboardData.swift
-//  audio-editor-macos
+//  Audio Editor
 //
 //  Created by russell.dzhafarov@gmail.com on 21.08.2021.
 //
