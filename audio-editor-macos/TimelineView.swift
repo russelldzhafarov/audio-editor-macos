@@ -15,8 +15,6 @@ class TimelineView: NSView {
     var viewModel: EditorViewModel? {
         didSet {
             waveformLayer.viewModel = viewModel
-            selectionLayer.viewModel = viewModel
-            cursorLayer.viewModel = viewModel
             rulerLayer.viewModel = viewModel
             
             updateLayerFrames()
@@ -30,8 +28,8 @@ class TimelineView: NSView {
     }
     
     let waveformLayer = WaveformLayer()
-    let selectionLayer = SelectionLayer()
-    let cursorLayer = CursorLayer()
+    let selectionLayer = CALayer()
+    let cursorLayer = CALayer()
     let rulerLayer = RulerLayer()
     
     override init(frame frameRect: NSRect) {
@@ -56,9 +54,11 @@ class TimelineView: NSView {
         rulerLayer.contentsScale = contentsScale
         rootLayer.addSublayer(rulerLayer)
         
+        selectionLayer.backgroundColor = NSColor.keyboardFocusIndicatorColor.withAlphaComponent(0.3).cgColor
         selectionLayer.contentsScale = contentsScale
         rootLayer.addSublayer(selectionLayer)
         
+        cursorLayer.backgroundColor = NSColor.systemRed.cgColor
         cursorLayer.contentsScale = contentsScale
         rootLayer.addSublayer(cursorLayer)
         
