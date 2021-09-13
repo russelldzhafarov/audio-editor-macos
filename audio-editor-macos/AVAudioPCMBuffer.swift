@@ -1,6 +1,6 @@
 //
 //  AVAudioPCMBuffer.swift
-//  audio-editor-macos
+//  Audio Editor
 //
 //  Created by russell.dzhafarov@gmail.com on 16.08.2021.
 //
@@ -8,6 +8,14 @@
 import AVFoundation
 import Accelerate
 import AppKit
+
+extension RangeReplaceableCollection where Iterator.Element: ExpressibleByIntegerLiteral {
+    /// Initialize array with zeros, ~10x faster than append for array of size 4096
+    /// - parameter count: Number of elements in the array
+    public init(zeros count: Int) {
+        self.init(repeating: 0, count: count)
+    }
+}
 
 extension AVAudioPCMBuffer {
     static let pbType = NSPasteboard.PasteboardType("com.russelldzhafarov.audio-editor-macos.audio.pbtype")

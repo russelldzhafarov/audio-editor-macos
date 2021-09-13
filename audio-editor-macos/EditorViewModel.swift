@@ -26,6 +26,7 @@ class EditorViewModel: ObservableObject {
          AVFileType.wav.rawValue]
     }
     
+    var fileURL: URL?
     var pcmBuffer: AVAudioPCMBuffer?
     var fileFormat: AVAudioFormat?
     var processingFormat: AVAudioFormat?
@@ -269,19 +270,31 @@ class EditorViewModel: ObservableObject {
         }
     }
     
-    func saveFile(to url: URL) throws {
-        guard let pcmBuffer = pcmBuffer,
-              let fileFormat = fileFormat,
-              let processingFormat = processingFormat else { throw AVError(.unknown) }
-        
-        var settings = fileFormat.settings
-        settings[AVFormatIDKey] = kAudioFormatMPEG4AAC
-        
-        let file = try AVAudioFile(forWriting: url,
-                                   settings: settings,
-                                   commonFormat: processingFormat.commonFormat,
-                                   interleaved: processingFormat.isInterleaved)
-        try file.write(from: pcmBuffer)
+    func saveFile(to url: URL) {
+        state = .processing
+        serviceQueue.addOperation {
+            defer {
+                self.state = .ready
+            }
+            do {
+                guard let pcmBuffer = self.pcmBuffer,
+                      let fileFormat = self.fileFormat,
+                      let processingFormat = self.processingFormat else { throw AVError(.unknown) }
+                
+                var settings = fileFormat.settings
+                settings[AVFormatIDKey] = kAudioFormatMPEG4AAC
+                
+                let file = try AVAudioFile(forWriting: url,
+                                           settings: settings,
+                                           commonFormat: processingFormat.commonFormat,
+                                           interleaved: processingFormat.isInterleaved)
+                
+                try file.write(from: pcmBuffer)
+                
+            } catch {
+                self.error = error
+            }
+        }
     }
     
     func playBuffer(_ buffer: AVAudioPCMBuffer) throws {
