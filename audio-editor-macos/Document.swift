@@ -12,21 +12,31 @@ class Document: NSDocument {
 
     let viewModel = EditorViewModel()
 
-    override class var autosavesInPlace: Bool {
-        return true
-    }
-
+    override var isDocumentEdited: Bool { false }
+    
+    // This disables auto save.
+    override class var autosavesInPlace: Bool { false }
+    
     override func makeWindowControllers() {
         // Returns the Storyboard that contains your Document window.
         let storyboard = NSStoryboard(name: .main, bundle: nil)
-        let windowController = storyboard.instantiateController(withIdentifier: .document) as! EditorWindowController
-        self.addWindowController(windowController)
-        
-        undoManager?.levelsOfUndo = 10
-        viewModel.undoManager = undoManager
-        
-        windowController.viewModel = viewModel
-        windowController.contentViewController?.representedObject = viewModel
+        if let editorWindowController = storyboard.instantiateController(withIdentifier: .document) as? EditorWindowController {
+            addWindowController(editorWindowController)
+            
+            undoManager?.levelsOfUndo = 10
+            viewModel.undoManager = undoManager
+            
+            editorWindowController.viewModel = viewModel
+            
+            if let vc = editorWindowController.contentViewController {
+                vc.representedObject = viewModel
+            }
+        }
+    }
+    
+    // This enables asynchronous reading.
+    override class func canConcurrentlyReadDocuments(ofType typeName: String) -> Bool {
+        true
     }
     
     override func read(from url: URL, ofType typeName: String) throws {
@@ -39,6 +49,7 @@ class Document: NSDocument {
         
         try file.read(into: aBuffer)
         
+        viewModel.fileURL = url
         viewModel.pcmBuffer = aBuffer
         viewModel.fileFormat = file.fileFormat
         viewModel.processingFormat = file.processingFormat
@@ -46,6 +57,8 @@ class Document: NSDocument {
         viewModel.samples = aBuffer.compressed()
         viewModel.selectedTimeRange = nil
         viewModel.currentTime = .zero
+        
+        self.fileURL = nil
     }
 }
 
