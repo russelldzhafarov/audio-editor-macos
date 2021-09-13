@@ -26,23 +26,29 @@ extension NSImage.Name {
     static let delete = NSImage.Name("trash")
     static let play = NSImage.Name("play.fill")
     static let pause = NSImage.Name("pause.fill")
+    static let export = NSImage.Name("square.and.arrow.up")
 }
 
 extension NSToolbar.Identifier {
-    static let toolbarIdentifier = NSToolbar.Identifier("MainWindowToolbarIdentifier")
+    static let toolbarIdentifier = NSToolbar.Identifier("toolbar")
 }
 
 extension NSToolbarItem.Identifier {
-    static let undo = NSToolbarItem.Identifier(rawValue: "undoToolbarItemIdentifier")
-    static let redo = NSToolbarItem.Identifier(rawValue: "redoToolbarItemIdentifier")
-    static let cut = NSToolbarItem.Identifier(rawValue: "cutToolbarItemIdentifier")
-    static let copy = NSToolbarItem.Identifier(rawValue: "copyToolbarItemIdentifier")
-    static let paste = NSToolbarItem.Identifier(rawValue: "pasteToolbarItemIdentifier")
-    static let delete = NSToolbarItem.Identifier(rawValue: "deleteToolbarItemIdentifier")
+    static let undo = NSToolbarItem.Identifier(rawValue: "undo")
+    static let redo = NSToolbarItem.Identifier(rawValue: "redo")
+    static let cut = NSToolbarItem.Identifier(rawValue: "cut")
+    static let copy = NSToolbarItem.Identifier(rawValue: "copy")
+    static let paste = NSToolbarItem.Identifier(rawValue: "paste")
+    static let delete = NSToolbarItem.Identifier(rawValue: "delete")
+    static let export = NSToolbarItem.Identifier(rawValue: "export")
 }
 
 class EditorWindowController: NSWindowController {
 
+    let savePanel: NSSavePanel = {
+        return NSSavePanel()
+    }()
+    
     var viewModel: EditorViewModel?
     
     override func windowDidLoad() {
@@ -64,6 +70,22 @@ class EditorWindowController: NSWindowController {
         window?.isMovableByWindowBackground = true
     }
     
+    func export() {
+        guard let fileURL = viewModel?.fileURL else { return }
+        
+        let exportPath = NSString(string: fileURL.lastPathComponent)
+            .deletingPathExtension
+            .appending("-edited")
+            .appending(".m4a")
+        
+        savePanel.nameFieldStringValue = exportPath
+        
+        guard savePanel.runModal() == .OK,
+              let url = savePanel.url else { return }
+        
+        viewModel?.saveFile(to: url)
+    }
+    
     // MARK: - Toolbar Item Custom Actions
     @IBAction func undo(_ sender: Any) { viewModel?.undoManager?.undo() }
     @IBAction func redo(_ sender: Any) { viewModel?.undoManager?.redo() }
@@ -71,6 +93,7 @@ class EditorWindowController: NSWindowController {
     @IBAction func copy(_ sender: Any) { viewModel?.copy() }
     @IBAction func paste(_ sender: Any) { viewModel?.paste() }
     @IBAction func delete(_ sender: Any) { viewModel?.delete() }
+    @IBAction func saveTo(_ sender: Any?) { export() }
 }
 
 extension EditorWindowController: NSMenuItemValidation {
@@ -106,17 +129,17 @@ extension EditorWindowController: NSToolbarItemValidation {
         case .delete:
             return viewModel?.selectedTimeRange != nil
         default:
-            return false
+            return true
         }
     }
 }
 
 extension EditorWindowController: NSToolbarDelegate {
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [.undo, .redo, .space, .cut, .copy, .paste, .delete, .flexibleSpace]
+        [.undo, .redo, .space, .cut, .copy, .paste, .delete, .flexibleSpace, .export]
     }
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [.undo, .redo, .cut, .copy, .paste, .delete, .space, .flexibleSpace]
+        [.undo, .redo, .cut, .copy, .paste, .delete, .space, .flexibleSpace, .export]
     }
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
         
@@ -153,6 +176,11 @@ extension EditorWindowController: NSToolbarDelegate {
             label = "Delete"
             action = #selector(delete(_:))
             symbolName = .delete
+            
+        case .export:
+            label = "Export"
+            action = #selector(saveTo(_:))
+            symbolName = .export
             
         default:
             return nil
