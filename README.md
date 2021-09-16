@@ -1,2 +1,5 @@
-# audio-editor-macos
-Audio Editor for macOS
+# Audio Editor for macOS
+
+Simple Audio Editor app for macOS.
+
+![Screenshot](./AudioEditor.png)
