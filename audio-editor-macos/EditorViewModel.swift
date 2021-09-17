@@ -62,7 +62,7 @@ class EditorViewModel: ObservableObject {
     @Published var currentTime: TimeInterval = .zero
     
     private let engine = AVAudioEngine()
-    private var playerNode = AVAudioPlayerNode()
+    private let playerNode = AVAudioPlayerNode()
     private var timer: Timer?
     
     private var currentFrame: AVAudioFramePosition {
@@ -84,6 +84,38 @@ class EditorViewModel: ObservableObject {
     var status: String? {
         guard let pcmBuffer = pcmBuffer else { return nil }
         return "\(pcmBuffer.sampleRate / Double(1000)) kHz  |  \(pcmBuffer.channelCount == 1 ? "Mono" : "Stereo")  |  \(pcmBuffer.duration.mmss())"
+    }
+    
+    func power(at time: TimeInterval) -> Float {
+        guard duration > .zero else { return .zero }
+        
+        let sampleRate = Double(samples.count) / duration
+        
+        let index = Int(time * sampleRate)
+        
+        guard samples.indices.contains(index) else { return .zero }
+        
+        let power = samples[index]
+        
+        let avgPower = 20 * log10(power)
+        
+        return scaledPower(power: avgPower)
+    }
+    
+    func scaledPower(power: Float) -> Float {
+        guard power.isFinite else {
+            return .zero
+        }
+        
+        let minDb: Float = -80
+        
+        if power < minDb {
+            return .zero
+        } else if power >= 1.0 {
+            return 1.0
+        } else {
+            return (abs(minDb) - abs(power)) / abs(minDb)
+        }
     }
     
     func selectAll() {

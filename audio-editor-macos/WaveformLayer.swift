@@ -16,7 +16,7 @@ class WaveformLayer: CALayer {
         NSColor(red: 30.0/255.0, green: 31.0/255.0, blue: 40.0/255.0, alpha: 0.3)
     }
     
-    var viewModel: EditorViewModel?
+    weak var viewModel: EditorViewModel?
     
     override func draw(in ctx: CGContext) {
         guard let viewModel = viewModel else { return }
@@ -42,7 +42,7 @@ class WaveformLayer: CALayer {
         
         var x: CGFloat = .zero
         for time in stride(from: .zero, to: viewModel.duration, by: stepInSec) {
-            let power = self.power(at: time)
+            let power = viewModel.power(at: time)
             
             let heigth = max(CGFloat(1),
                              CGFloat(power) * (frame.height/2))
@@ -59,38 +59,5 @@ class WaveformLayer: CALayer {
         ctx.setLineWidth(lineWidth)
         ctx.setStrokeColor(WaveformLayer.waveformColor.cgColor)
         ctx.strokePath()
-    }
-    
-    private func power(at time: TimeInterval) -> Float {
-        guard let viewModel = viewModel,
-              viewModel.duration > .zero else { return .zero }
-        
-        let sampleRate = Double(viewModel.samples.count) / viewModel.duration
-        
-        let index = Int(time * sampleRate)
-        
-        guard viewModel.samples.indices.contains(index) else { return .zero }
-        
-        let power = viewModel.samples[index]
-        
-        let avgPower = 20 * log10(power)
-        
-        return scaledPower(power: avgPower)
-    }
-    
-    private func scaledPower(power: Float) -> Float {
-        guard power.isFinite else {
-            return .zero
-        }
-        
-        let minDb: Float = -80
-        
-        if power < minDb {
-            return .zero
-        } else if power >= 1.0 {
-            return 1.0
-        } else {
-            return (abs(minDb) - abs(power)) / abs(minDb)
-        }
     }
 }

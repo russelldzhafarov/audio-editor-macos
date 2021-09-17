@@ -12,7 +12,7 @@ class TimelineView: NSView {
     override var mouseDownCanMoveWindow: Bool { false }
     override var isFlipped: Bool { true }
     
-    var viewModel: EditorViewModel? {
+    weak var viewModel: EditorViewModel? {
         didSet {
             waveformLayer.viewModel = viewModel
             rulerLayer.viewModel = viewModel
