@@ -27,10 +27,10 @@ class TimelineView: NSView {
         }
     }
     
-    let waveformLayer = WaveformLayer()
-    let selectionLayer = CALayer()
-    let cursorLayer = CALayer()
-    let rulerLayer = RulerLayer()
+    private let waveformLayer = WaveformLayer()
+    private let selectionLayer = CALayer()
+    private let cursorLayer = CALayer()
+    private let rulerLayer = RulerLayer()
     
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -44,22 +44,22 @@ class TimelineView: NSView {
     
     func setup() {
         wantsLayer = true
-        let contentsScale: CGFloat = NSScreen.main?.backingScaleFactor ?? CGFloat(1)
+        let scale = NSScreen.main?.backingScaleFactor ?? 1.0
         
         let rootLayer = CALayer()
         
-        waveformLayer.contentsScale = contentsScale
+        waveformLayer.contentsScale = scale
         rootLayer.addSublayer(waveformLayer)
         
-        rulerLayer.contentsScale = contentsScale
+        rulerLayer.contentsScale = scale
         rootLayer.addSublayer(rulerLayer)
         
         selectionLayer.backgroundColor = NSColor.keyboardFocusIndicatorColor.withAlphaComponent(0.3).cgColor
-        selectionLayer.contentsScale = contentsScale
+        selectionLayer.contentsScale = scale
         rootLayer.addSublayer(selectionLayer)
         
         cursorLayer.backgroundColor = NSColor.systemRed.cgColor
-        cursorLayer.contentsScale = contentsScale
+        cursorLayer.contentsScale = scale
         rootLayer.addSublayer(cursorLayer)
         
         layer = rootLayer
@@ -154,7 +154,7 @@ class TimelineView: NSView {
         
         let start = convert(event.locationInWindow, from: nil)
         
-        let startTime = (viewModel.duration * Double(start.x) / Double(bounds.width))
+        let startTime = viewModel.duration * Double(start.x) / Double(bounds.width)
         
         while true {
             guard let nextEvent = window?.nextEvent(matching: [.leftMouseUp, .leftMouseDragged]) else { continue }
@@ -167,7 +167,7 @@ class TimelineView: NSView {
                 
             } else {
                 
-                let endTime = (viewModel.duration * Double(end.x) / Double(bounds.width))
+                let endTime = viewModel.duration * Double(end.x) / Double(bounds.width)
                 
                 if startTime < endTime {
                     viewModel.selectedTimeRange = (startTime ... endTime).clamped(to: .zero ... viewModel.duration)
