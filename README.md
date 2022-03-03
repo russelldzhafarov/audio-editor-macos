@@ -10,7 +10,11 @@ Download and run the `AudioEditor.zip` file for the latest [release](https://git
 
 ## Author
 
-Russell Dzhafarov
+Ruslan Dzhafarov
+
+## Contacts
+
+Do you have any questions, feedback or good ideas? I'm always happy to hear from you! Please contact me at russell.dzhafarov@gmail.com.
 
 ## License
 
